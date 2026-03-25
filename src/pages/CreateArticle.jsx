@@ -12,7 +12,7 @@ const CreateArticle = () => {
     summary: '',
     content: '',
     status: 'DRAFT',
-    categories: [],
+    categories: '',  // Chaîne vide, pas array
   });
 
   const handleChange = (e) => {
