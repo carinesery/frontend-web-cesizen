@@ -22,6 +22,7 @@ const AdminLayout = ({ children }) => {
           <Link to="/admin" style={styles.navLink}>📊 Dashboard</Link>
           <Link to="/admin/articles" style={styles.navLink}>📄 Articles</Link>
           <Link to="/admin/categories" style={styles.navLink}>🏷️ Catégories</Link>
+          <Link to="/admin/users" style={styles.navLink}>👥 Utilisateurs</Link>
         </nav>
         <button onClick={handleLogout} style={styles.logoutBtn}>
           Déconnexion
