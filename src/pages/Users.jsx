@@ -24,7 +24,32 @@ const Users = () => {
         }
     }
 
-    // ici il y a un handleDeleteUser qui va appeler le service de suppression d'utilisateur et mettre à jour la liste des users
+    const handleToggleActive = async (user) => {
+        const newStatus = !user.isActive;
+        try {
+            const updatedUser = await userService.setActiveStatus(user.idUser, newStatus);
+            setUsers(users.map(u => u.idUser === updatedUser.id
+                ? { ...u, isActive: updatedUser.isActive }
+                : u
+            ));
+        } catch (err) {
+            alert('Erreur lors de la mise à jour du statut');
+        }
+    };
+
+    const handleDeleteUser = async (idUser) => {
+        if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
+
+        try {
+            await userService.delete(idUser);
+            // Mettre à jour la liste localement
+            setUsers(users.filter(u => u.idUser !== idUser));
+        } catch (err) {
+            alert('Erreur lors de la suppression');
+        }
+    };
+
+
 
     // Render conditionnel 
     if (loading) return <AdminLayout><div>Chargement...</div></AdminLayout>;
@@ -82,8 +107,16 @@ const Users = () => {
                                     onClick={() => navigate(`/admin/users/${user.idUser}/edit`)}
                                 > Modifier
                                 </button>
-                                <button style={styles.btn}>Désactiver</button>
-                                <button style={styles.btn}>Supprimer</button>
+                                <button
+                                    style={styles.btn}
+                                    onClick={() => handleToggleActive(user)}
+                                >{user.isActive ? 'Désactiver' : 'Activer'}
+                                </button>
+                                <button
+                                    style={styles.btn}
+                                    onClick={() => handleDeleteUser(user.idUser)}
+                                >Supprimer
+                                </button>
                             </td>
                         </tr>
                     ))}

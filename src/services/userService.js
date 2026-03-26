@@ -16,7 +16,7 @@ export const userService = {
         return response.data;
     },
 
-    confirmEmail: async(token) => {
+    confirmEmail: async (token) => {
         const response = await apiClient.get(`/auth/confirm-email?token=${encodeURIComponent(token)}`);
         return response.data;
     },
@@ -43,11 +43,19 @@ export const userService = {
     },
 
     setActiveStatus: async (id, isActive) => {
-        const response = await apiClient.patch(`/admin/users/${id}/status`, { isActive });
-        return response.data;
+        try {
+            const response = await apiClient.patch(`/admin/users/${id}/status`, { isActive });
+            return response.data;
+        } catch (error) {
+            // ⚡ Ici on récupère le message du backend si possible
+            if (error.response && error.response.data?.message) {
+                throw new Error(error.response.data.message);
+            }
+            throw error; // Sinon on remonte l'erreur originale
+        }
     },
 
-    delete: async(id) => {
+    delete: async (id) => {
         const response = await apiClient.delete(`/admin/users/${id}`);
         return response.data;
     }
