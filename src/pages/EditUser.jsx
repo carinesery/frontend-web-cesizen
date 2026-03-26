@@ -8,7 +8,7 @@ import AdminLayout from '../components/AdminLayout.jsx';
 const EditUser = () => {
 
     const [loading, setLoading] = useState(true);
-    const [selectedFile, setSelectedFile] = useState(null);
+
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -18,6 +18,8 @@ const EditUser = () => {
         profilPictureUrl: undefined, // ? attention, il faut ce champ pour supprimer une photo de profil ... alors on laisse en undefined ? je ne sais pas ! et les champs sont optionnels alors faut-il le noter qq part ? + si ce champ ne peut pas être undefined ou null et qu'il y ait un file ...  
         role: ''
     })
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [removePicture, setRemovePicture] = useState(false);
 
     const [errors, setErrors] = useState({});
 
@@ -35,7 +37,8 @@ const EditUser = () => {
                     email: user.email,
                     profilPictureUrl: user.profilPictureUrl,
                     role: user.role
-                });
+                })
+               
             } catch (error) {
                 console.error('Erreur lors du chargement des données utilisateur:', error);
             } finally {
@@ -44,6 +47,7 @@ const EditUser = () => {
         };
 
         fetchUserData();
+
     }, [id]);
 
 
@@ -129,13 +133,14 @@ const EditUser = () => {
             formDataToSend.append('username', validatedData.username);
             formDataToSend.append('email', validatedData.email);
             formDataToSend.append('role', validatedData.role);
-            formDataToSend.append('profilPictureUrl', validatedData.profilPictureUrl || ''); // Si on veut permettre de supprimer la photo de profil, il faut envoyer une valeur vide ou null pour ce champ. A voir comment le backend gère ça.
 
             if (selectedFile) {
                 formDataToSend.append('profilPictureUrl', selectedFile);
-                // là ca va écraser ? 
             }
 
+            if (removePicture) {
+                formDataToSend.append('removePicture', 'true');
+            }
 
             const updatedUser = await userService.update(id, formDataToSend);
             setSuccessMessage(`✅ Utilisateur ${updatedUser.username} créé avec succès !`);
@@ -305,6 +310,19 @@ const EditUser = () => {
                                 {errors.profilPicture}
                             </span>
                         )}
+                        {formData.profilPictureUrl && !selectedFile && (
+                            <div>
+                                <img src={`http://localhost:3000${formData.profilPictureUrl}`} width="100" />
+                                <button type="button"
+                                    onClick={() => {
+                                        setRemovePicture(true);
+                                        setFormData(prev => ({ ...prev, profilPictureUrl: null }));
+                                    }}
+                                >
+                                    Supprimer la photo
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* ===== SUBMIT BUTTON ===== */}
@@ -322,7 +340,7 @@ const EditUser = () => {
                             fontSize: '16px'
                         }}
                     >
-                        {loading ? 'Création en cours...' : 'Créer l\'utilisateur'}
+                        {loading ? 'Modification en cours...' : 'Modifier l\'utilisateur'}
                     </button>
                 </form>
             </div>
