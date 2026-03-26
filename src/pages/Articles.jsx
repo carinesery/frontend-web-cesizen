@@ -26,7 +26,9 @@ const Articles = () => {
     }
   };
 
-  const handleDelete = async (slug) => {
+  console.log(articles);
+
+  const handleDeleteArticle = async (slug) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
       return;
     }
@@ -64,6 +66,7 @@ const Articles = () => {
                 <th>Titre</th>
                 <th>Slug</th>
                 <th>Statut</th>
+                <th>Catégories</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -72,7 +75,8 @@ const Articles = () => {
                 <tr key={article.idArticle}>
                   <td>{article.title}</td>
                   <td>{article.slug}</td>
-                  <td>{article.status}</td>
+                  <td>{article.status.toLowerCase()}</td>
+                  <td>{article.categories.map(cat => cat.title).join(', ')}</td>
                   <td style={styles.actions}>
                     <button 
                       onClick={() => navigate(`/admin/articles/${article.slug}`)}
@@ -87,7 +91,7 @@ const Articles = () => {
                       ✏️ Éditer
                     </button>
                     <button 
-                      onClick={() => handleDelete(article.slug)}
+                      onClick={() => handleDeleteArticle(article.slug)}
                       style={{ ...styles.btnSmall, background: '#e74c3c' }}
                     >
                       🗑️ Supprimer

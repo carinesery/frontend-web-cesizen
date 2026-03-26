@@ -57,7 +57,7 @@ const EditUser = () => {
         try {
             // Schéma partiel pour update
             const fieldSchema = adminUpdateUserBodySchema.pick({ [name]: true });
-            fieldSchema.parse({ [name]: value });
+            fieldSchema.parse({ [name]: value});
 
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -68,7 +68,7 @@ const EditUser = () => {
             if (error instanceof z.ZodError) {
                 setErrors(prev => ({
                     ...prev,
-                    [name]: error.errors[0]?.message || 'Erreur de validation'
+                    [name]: error.issues[0]?.message || 'Erreur de validation'
                 }));
             }
         }

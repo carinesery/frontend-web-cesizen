@@ -34,38 +34,12 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/articles"
-            element={
-              <ProtectedRoute>
-                <Articles />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/articles/create"
-            element={
-              <ProtectedRoute>
-                <CreateArticle />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/articles/:slug"
-            element={
-              <ProtectedRoute>
-                <ArticleDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/articles/:slug/edit"
-            element={
-              <ProtectedRoute>
-                <CreateArticle />
-              </ProtectedRoute>
-            }
-          />
+          {/* Routes Articles */}
+          <Route path="/admin/articles" element={<ProtectedRoute><Articles /></ProtectedRoute>}/>
+          <Route path="/admin/articles/:slug" element={<ProtectedRoute><ArticleDetail /></ProtectedRoute>}/>
+          <Route path="/admin/articles/create" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>}/>
+          {/* <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>}/> */}
+
           {/* Routes Categories */}
           <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>}/>
           <Route path="/admin/categories/create" element={<ProtectedRoute><CreateCategory /></ProtectedRoute>} />

@@ -54,7 +54,7 @@ const CreateUser = () => {
                 // Ajouter le message d'erreur Zod
                 setErrors(prev => ({
                     ...prev,
-                    [name]: error.errors[0]?.message || 'Erreur de validation'
+                    [name]: error.issues[0]?.message || 'Erreur de validation'
                 }));
             }
         }
