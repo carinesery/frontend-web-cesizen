@@ -13,6 +13,9 @@ import ViewUser from './pages/ViewUser.jsx';
 import CreateUser from './pages/CreateUser.jsx';
 import ConfirmEmailPage from './pages/ConfirmEmailPage.jsx';
 import EditUser from './pages/EditUser.jsx';
+import CreateCategory from './pages/CreateCategory.jsx';
+import ViewCategory from './pages/ViewCategory.jsx';
+import EditCategory from './pages/EditCategory.jsx';
 
 function App() {
   return (
@@ -63,14 +66,12 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/categories"
-            element={
-              <ProtectedRoute>
-                <Categories />
-              </ProtectedRoute>
-            }
-          />
+          {/* Routes Categories */}
+          <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>}/>
+          <Route path="/admin/categories/create" element={<ProtectedRoute><CreateCategory /></ProtectedRoute>} />
+          <Route path="/admin/categories/:slug" element={<ProtectedRoute><ViewCategory /></ProtectedRoute>} />
+          <Route path="/admin/categories/:slug/edit" element={<ProtectedRoute><EditCategory /></ProtectedRoute>} />
+
           {/* Routes Users */}
           {/* A créer après : CreateUser & EditUser */}
           <Route path="/admin/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
@@ -78,7 +79,7 @@ function App() {
           <Route path="/admin/users/create" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
           <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/admin/users/:id/edit" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
-            
+
           {/* Redirect root to admin */}
           <Route path="/" element={<Navigate to="/admin" replace />} />
         </Routes>
