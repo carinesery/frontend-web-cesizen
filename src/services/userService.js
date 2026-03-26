@@ -16,6 +16,27 @@ export const userService = {
         return response.data;
     },
 
+    confirmEmail: async(token) => {
+        const response = await apiClient.get(`/auth/confirm-email?token=${encodeURIComponent(token)}`);
+        return response.data;
+    },
+
+    acceptLegal: async (termsConsent, privacyConsent, legalToken) => {
+        const response = await apiClient.post(
+            "/auth/accept-legal",
+            {
+                termsConsent,
+                privacyConsent,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${legalToken}`,
+                },
+            }
+        );
+        return response.data;
+    },
+
     update: async (id, userData) => {
         const response = await apiClient.patch(`/admin/users/${id}`, userData);
         return response.data;

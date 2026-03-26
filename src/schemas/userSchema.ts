@@ -25,3 +25,27 @@ export const createUserSchema = z.object({
 
 // Type TypeScript automatique depuis le schéma
 export type CreateUserInput = z.infer<typeof createUserSchema>;
+
+
+export const adminUpdateUserBodySchema = z.object({
+    username: z
+        .string()
+        .min(3, "Le nom d'utilisateur doit faire au moins 3 caractères")
+        .max(50, "Le nom d'utilisateur ne doit pas dépasser 50 caractères")
+        .optional(),
+    profilPictureUrl: z
+        .string()
+        .max(500, "L'url ne doit pas dépasser 500 caractères")
+        .nullable()
+        .optional(),
+    email: z
+        .email()
+        .max(255, "L'email ne doit pas dépasser 255 caractères")
+        .optional(),
+    role: z.enum(['USER', 'ADMIN']).optional()
+}).refine(
+    data => Object.keys(data).length > 0,
+    { message: "Au moins un champ doit être modifié" }
+);
+
+export type AdminUpdateUserBodyInput = z.infer<typeof adminUpdateUserBodySchema>;

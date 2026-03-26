@@ -65,11 +65,12 @@ const Users = () => {
                     {users.map((user) => (
                         <tr key={user.idUser}>
                             <td>{user.email}</td>
-                            <td>{user.role}</td>
-                            <td>{user.isActive ? 'Actif' : 'Désactivé'}</td>
-                            <td>{user.createdAt}</td>
-                            <td>{user.updatedAt}</td>
-                            <td>{user.deletedAt}</td>
+                            <td>{user.role.toLowerCase()}</td>
+                            <td>{user.isActive ? 'actif' : 'désactivé'}</td>
+                            <td>{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
+                            <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '-'}</td>
+                            <td>{user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('fr-FR') : '-'}</td>
+                            <td>{user.deletedAt ? new Date(user.deletedAt).toLocaleDateString('fr-FR') : '-'}</td>
                             <td>
                                 <button
                                     style={styles.btn}

@@ -9,8 +9,10 @@ import ArticleDetail from './pages/ArticleDetail.jsx';
 import CreateArticle from './pages/CreateArticle.jsx';
 import Categories from './pages/Categories.jsx';
 import Users from './pages/Users.jsx';
-import CreateUser from './pages/CreateUser.jsx';
 import ViewUser from './pages/ViewUser.jsx';
+import CreateUser from './pages/CreateUser.jsx';
+import ConfirmEmailPage from './pages/ConfirmEmailPage.jsx';
+import EditUser from './pages/EditUser.jsx';
 
 function App() {
   return (
@@ -74,7 +76,8 @@ function App() {
           <Route path="/admin/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
           <Route path="/admin/users/:id" element={<ProtectedRoute><ViewUser /></ProtectedRoute>} />
           <Route path="/admin/users/create" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
-          {/* <Route path="/admin/users/:id/edit" element={<ProtectedRoute><EditUser /></ProtectedRoute>} /> */}
+          <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
+          <Route path="/admin/users/:id/edit" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
             
           {/* Redirect root to admin */}
           <Route path="/" element={<Navigate to="/admin" replace />} />
