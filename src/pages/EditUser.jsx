@@ -1,49 +1,64 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { createUserSchema } from '../schemas/userSchema.ts';
+import { adminUpdateUserBodySchema } from '../schemas/userSchema.ts';
 import { userService } from '../services/userService.js';
 import AdminLayout from '../components/AdminLayout.jsx';
 
-const CreateUser = () => {
+const EditUser = () => {
+
+    const [loading, setLoading] = useState(true);
+
+    const { id } = useParams();
     const navigate = useNavigate();
-    
-    // ========== STATE ==========
-    const [loading, setLoading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    
-    // Les données du formulaire
+
     const [formData, setFormData] = useState({
         username: '',
         email: '',
-        password: '',
-        confirmPassword: '',
-        role: 'USER'
-    });
+        profilPictureUrl: undefined, // ? attention, il faut ce champ pour supprimer une photo de profil ... alors on laisse en undefined ? je ne sais pas ! et les champs sont optionnels alors faut-il le noter qq part ? + si ce champ ne peut pas être undefined ou null et qu'il y ait un file ...  
+        role: ''
+    })
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [removePicture, setRemovePicture] = useState(false);
 
-    // Les erreurs de validation
     const [errors, setErrors] = useState({});
-    
-    // Message de succès
+
     const [successMessage, setSuccessMessage] = useState('');
 
-    // ========== VALIDATION ==========
-    // Valide UN champ à la fois (quand tu quittes le champ - onBlur)
+
+    // ===== EXISTING USER DATA LOAD ===== //
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                setLoading(true);
+                const user = await userService.getById(id);
+                setFormData({
+                    username: user.username,
+                    email: user.email,
+                    profilPictureUrl: user.profilPictureUrl,
+                    role: user.role
+                })
+               
+            } catch (error) {
+                console.error('Erreur lors du chargement des données utilisateur:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+
+    }, [id]);
+
+
+    // ===== VALIDATION ===== //
+
     const validateField = (name, value) => {
         try {
-            // On crée un schéma partiel juste pour ce champ
-            const fieldSchema = createUserSchema.pick({ [name]: true });
+            // Schéma partiel pour update
+            const fieldSchema = adminUpdateUserBodySchema.pick({ [name]: true });
             fieldSchema.parse({ [name]: value });
-            
-            // Si password ou confirmPassword, valider aussi que les deux correspondent
-            if (name === 'password' || name === 'confirmPassword') {
-                createUserSchema.parse({
-                    ...formData,
-                    [name]: value
-                });
-            }
 
-            // Si valide, enlever l'erreur pour ce champ
             setErrors(prev => {
                 const newErrors = { ...prev };
                 delete newErrors[name];
@@ -51,56 +66,45 @@ const CreateUser = () => {
             });
         } catch (error) {
             if (error instanceof z.ZodError) {
-                // Ajouter le message d'erreur Zod
                 setErrors(prev => ({
                     ...prev,
                     [name]: error.errors[0]?.message || 'Erreur de validation'
                 }));
             }
         }
-    };
+    }
 
-    // ========== HANDLERS ==========
-    // Quand tu tapes dans un input
+
+    // === HANDLERS === //
+
+    // ----- Form ----- //
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }
 
-    // Quand tu quittes un input (validation en temps réel)
     const handleBlur = (e) => {
         const { name, value } = e.target;
         validateField(name, value);
-    };
+    }
 
-    // Quand tu sélectionnes un fichier image
+    // ----- File ----- //
     const handleFileChange = (e) => {
-        const file = e.target.files?.[0];
+        const file = e.target.files[0];
+
         if (file) {
-            // Vérifier que c'est une image
             if (!file.type.startsWith('image/')) {
-                setErrors(prev => ({
-                    ...prev,
-                    profilPicture: 'Seules les images sont acceptées'
-                }));
+                setErrors(prev => ({ ...prev, profilPicture: 'Seules les images sont acceptées' }));
                 setSelectedFile(null);
                 return;
             }
-            
-            // Vérifier la taille (max 5MB)
+
             if (file.size > 5 * 1024 * 1024) {
-                setErrors(prev => ({
-                    ...prev,
-                    profilPicture: 'Le fichier est trop volumineux (max 5MB)'
-                }));
+                setErrors(prev => ({ ...prev, profilPicture: 'Le fichier est trop volumineux (max 5MB)' }));
                 setSelectedFile(null);
                 return;
             }
-            
-            // OK, on sauvegarde le fichier
+
             setSelectedFile(file);
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -110,102 +114,75 @@ const CreateUser = () => {
         }
     };
 
-    // ========== SUBMISSION ==========
-    // Quand tu cliques "Créer l'utilisateur"
+    // ===== SUBMIT ===== //
+
+    // Normalement, on devrait faire un useEffect pour charger les données de l'utilisateur à modifier, pré-remplir le formData, etc. Mais pour l'instant, on se concentre sur le submit.
+    // + je dois aussi vérifier que au moins un champs est modifié.
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setSuccessMessage('');
-
+        setSuccessMessage('')// est ce que ici j'ai besoin de mettre  vu qu'il est déjà défini plus haut ? 
         try {
-            // 1. Valider TOUT le formulaire avec Zod
-            const validatedData = createUserSchema.parse(formData);
-            setErrors({});
-            
-            setLoading(true);
 
-            // 2. Créer FormData pour envoyer fichier + données
-            const formDataToSend = new FormData();
+            const validatedData = adminUpdateUserBodySchema.parse(formData);
+            setErrors({});
+
+            setLoading(true); // c'est déjà fait en haut, ai-je besoin de le remettre ici ?
+
+            const formDataToSend = new FormData(); // Ah oui c'est une instance ?
             formDataToSend.append('username', validatedData.username);
             formDataToSend.append('email', validatedData.email);
-            formDataToSend.append('password', validatedData.password);
-            formDataToSend.append('confirmPassword', validatedData.confirmPassword);
             formDataToSend.append('role', validatedData.role);
 
             if (selectedFile) {
                 formDataToSend.append('profilPictureUrl', selectedFile);
             }
 
-            // 3. Appeler le service backend
-            const newUser = await userService.create(formDataToSend);
-            
-            // 4. Afficher succès
-            setSuccessMessage(`✅ Utilisateur ${newUser.username} créé avec succès !`);
-            
-            // 5. Réinitialiser le formulaire
+            if (removePicture) {
+                formDataToSend.append('removePicture', 'true');
+            }
+
+            const updatedUser = await userService.update(id, formDataToSend);
+            setSuccessMessage(`✅ Utilisateur ${updatedUser.username} créé avec succès !`);
+
             setFormData({
-                username: '',
-                email: '',
-                password: '',
-                confirmPassword: '',
-                role: 'USER'
-            });
+                'username': '',
+                'email': '',
+                'role': '',
+                'profilPictureUrl': undefined
+            })
             setSelectedFile(null);
 
-            // 6. Rediriger après 2 secondes
             setTimeout(() => {
-                navigate('/admin/users');
+                navigate('/admin/users'); // Rediriger vers la liste des utilisateurs après 3 secondes   
             }, 2000);
 
         } catch (error) {
-            console.log('===== ERREUR ATTRAPÉE =====');
-            console.log('Type error.constructor.name:', error?.constructor?.name);
-            console.log('instanceof z.ZodError:', error instanceof z.ZodError);
-            console.log('error.issues exists?:', !!error?.issues);
-            console.log('Erreur complète:', error);
-
-            // Option 1: Est-ce une erreur Zod?
-            if (error instanceof z.ZodError && error.issues) {
-                console.log('✅ ZodError détectée');
+            if (error instanceof z.ZodError) {
                 const zodErrors = {};
-                
-                // Extraire juste le premier message par champ (utiliser .issues pas .errors!)
                 error.issues.forEach(err => {
                     const fieldName = err.path?.[0];
-                    
-                    // Ajouter qu'une seule fois par champ
-                    if (fieldName && !zodErrors[fieldName]) {
-                        zodErrors[fieldName] = err.message;
-                    }
+                    if (fieldName && !zodErrors[fieldName]) zodErrors[fieldName] = err.message;
                 });
-                
-                console.log('Erreurs parsées:', zodErrors);
                 setErrors(zodErrors);
-            }
-            // Option 2: Erreur du serveur (axios)
-            else if (error?.response?.data?.message) {
-                console.log('❌ Erreur serveur');
+            } else if (error?.response?.data?.message) {
                 setErrors({ submit: error.response.data.message });
+            } else {
+                setErrors({ submit: error.message || 'Erreur inconnue' });
             }
-            // Option 3: Autre erreur
-            else if (error?.message) {
-                console.log('⚠️ Autre erreur:', error.message);
-                setErrors({ submit: error.message });
-            }
-            // Option 4: Erreur complètement inconnue
-            else {
-                console.log('🤷 Erreur inconnue');
-                setErrors({ submit: 'Une erreur est survenue' });
-            }
-        } finally {
+        }
+        finally {
             setLoading(false);
         }
     };
 
-    // ========== RENDER ==========
+
+    // ===== RENDER ===== //
+
     return (
         <AdminLayout>
             <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-                <h2>Créer un utilisateur</h2>
+                <h2>Modifier un utilisateur</h2>
 
                 {/* Message de succès */}
                 {successMessage && (
@@ -276,62 +253,6 @@ const CreateUser = () => {
                         )}
                     </div>
 
-                    {/* ===== PASSWORD ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="password">Mot de passe *</label>
-                        <input
-                            id="password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            placeholder="Min 8 caractères"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.password ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
-                        />
-                        {errors.password && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
-                                {errors.password}
-                            </span>
-                        )}
-                        <small style={{ display: 'block', marginTop: '5px', color: '#666' }}>
-                            Doit contenir: 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial
-                        </small>
-                    </div>
-
-                    {/* ===== CONFIRM PASSWORD ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="confirmPassword">Confirmer le mot de passe *</label>
-                        <input
-                            id="confirmPassword"
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            placeholder="Réentrer le mot de passe"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.confirmPassword ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
-                        />
-                        {errors.confirmPassword && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
-                                {errors.confirmPassword}
-                            </span>
-                        )}
-                    </div>
 
                     {/* ===== ROLE ===== */}
                     <div style={{ marginBottom: '15px' }}>
@@ -389,6 +310,19 @@ const CreateUser = () => {
                                 {errors.profilPicture}
                             </span>
                         )}
+                        {formData.profilPictureUrl && !selectedFile && (
+                            <div>
+                                <img src={`http://localhost:3000${formData.profilPictureUrl}`} width="100" />
+                                <button type="button"
+                                    onClick={() => {
+                                        setRemovePicture(true);
+                                        setFormData(prev => ({ ...prev, profilPictureUrl: null }));
+                                    }}
+                                >
+                                    Supprimer la photo
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* ===== SUBMIT BUTTON ===== */}
@@ -406,12 +340,13 @@ const CreateUser = () => {
                             fontSize: '16px'
                         }}
                     >
-                        {loading ? 'Création en cours...' : 'Créer l\'utilisateur'}
+                        {loading ? 'Modification en cours...' : 'Modifier l\'utilisateur'}
                     </button>
                 </form>
             </div>
         </AdminLayout>
-    );
+    )
+
 };
 
-export default CreateUser;
+export default EditUser;

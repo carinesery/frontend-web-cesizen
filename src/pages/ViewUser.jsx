@@ -153,17 +153,25 @@ const ViewUser = () => {
                     <div style={{ marginBottom: '15px' }}>
                         <label style={{ fontWeight: 'bold', color: '#333' }}>Créé le</label>
                         <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px', fontSize: '12px' }}>
-                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '-'}
                         </p>
                     </div>
-
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ fontWeight: 'bold', color: '#333' }}>Modifié le</label>
-                        <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px', fontSize: '12px' }}>
-                            {user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('fr-FR') : 'N/A'}
-                        </p>
-                    </div>
-
+                    {user.disabledAt && (
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ fontWeight: 'bold', color: '#333' }}>Modifié le</label>
+                            <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px', fontSize: '12px' }}>
+                                {new Date(user.updatedAt).toLocaleDateString('fr-FR')}
+                            </p>
+                        </div>
+                    )}
+                    {user.disabledAt && (
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ fontWeight: 'bold', color: '#333' }}>Désactivé le</label>
+                            <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px', fontSize: '12px' }}>
+                                {new Date(user.disabledAt).toLocaleDateString('fr-FR')}
+                            </p>
+                        </div>
+                    )}
                     {user.deletedAt && (
                         <div style={{ marginBottom: '15px' }}>
                             <label style={{ fontWeight: 'bold', color: '#333' }}>Supprimé le</label>
