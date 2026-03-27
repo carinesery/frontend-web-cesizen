@@ -216,6 +216,11 @@ const CreateArticle = () => {
             {successMessage}
           </div>
         )}
+        {errors.submit && (
+          <div style={styles.error}>
+            {errors.submit}
+          </div>
+        )}
         <button
           onClick={() => navigate('/admin/articles')}
           style={styles.backBtn}

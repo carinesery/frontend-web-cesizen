@@ -1,75 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { set, z } from 'zod';
-import { updateArticleBodySchema } from '../schemas/articleSchema.js';
-import { categoryService } from '../services/categoryService.js';
-import { articleService } from '../services/articleService.js';
+import { z } from 'zod';
+import { updateEmotionBodySchema } from '../schemas/emotionSchema.js';
+import { emotionService } from '../services/emotionService.js';
 import AdminLayout from '../components/AdminLayout.jsx';
+import { LevelEmotionEnum } from '../schemas/emotionSchema.ts';
 
-const EditArticle = () => {
+const EditEmotion = () => {
     const navigate = useNavigate();
-    const { slug } = useParams();
+    const { id } = useParams();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [parentEmotions, setParentEmotions] = useState([]);
     const [initialData, setInitialData] = useState(null);
-    const [removePicture, setRemovePresentationImage] = useState(false);
-    const [categories, setCategories] = useState([]);
+    const [removePicture, setRemovePicture] = useState(false);
+
 
     const [formData, setFormData] = useState({
         title: '',
-        summary: '',
-        content: '',
-        status: '',
-        categories: [],
-        presentationImageUrl: null,
+        description: '',
+        level: '',
+        parentEmotionId: '',
+        iconUrl: '',
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
 
-
-    // ========== CHARGEMENT DES CATÉGORIES POUR LE SELECT ========== //
-    useEffect(() => {
-
-        const fetchArticle = async () => {
-            try {
-                setLoading(true);
-                const data = await articleService.getBySlug(slug);
-                console.log("Données des catégories récupérées:", data);
-                setFormData({
-                    title: data.title,
-                    summary: data.summary,
-                    content: data.content,
-                    status: data.status,
-                    categories: data.categories.map(category => category.slug),
-                    presentationImageUrl: data.presentationImageUrl,
-                });
-
-                setInitialData({
-                    title: data.title,
-                    summary: data.summary,
-                    content: data.content,
-                    status: data.status,
-                    categories: data.categories.map(category => category.slug),
-                });
-            } catch (error) {
-                console.error('Erreur lors du chargement de l\'article:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        const fetchCategories = async () => {
-            try {
-                const data = await categoryService.getAll();
-
-                setCategories(data.map(category => ({ title: category.title, slug: category.slug })));
-            } catch (error) {
-                console.error('Erreur lors du chargement des catégories:', error);
-            }
-        };
-
-        fetchArticle();
-        fetchCategories();
-    }, [slug]);
 
     // Les erreurs de validation
     const [errors, setErrors] = useState({});
@@ -77,28 +33,65 @@ const EditArticle = () => {
     // Message de succès
     const [successMessage, setSuccessMessage] = useState('');
 
+
     // Fonction pour vérifier s'il y a des changements dans le formulaire
     const hasChanges = () => {
         if (!initialData) return false;
 
         return (
             formData.title !== initialData.title ||
-            formData.summary !== initialData.summary ||
-            formData.content !== initialData.content ||
-            formData.status !== initialData.status ||
-            JSON.stringify(formData.categories) !== JSON.stringify(initialData.categories) ||
+            formData.description !== initialData.description ||
+            formData.parentEmotionId !== initialData.parentEmotionId ||
+            formData.level !== initialData.level ||
             selectedFile !== null ||
-            removePicture // 👈 important
+            removePicture // si l'utilisateur a choisi de supprimer la photo
         );
     };
 
 
-    // ========== VALIDATION DES CHAMPS========== //
+    // ========== CHARGEMENT DES ÉMOTIONS POUR LE SELECT ========== //
+    useEffect(() => {
+        const fetchEmotions = async () => {
+            try {
+                const data = await emotionService.getAll();
+                console.log("Toutes les émotions:", data);
+                setParentEmotions(data
+                    .filter(emotion => emotion.level === LevelEmotionEnum.LEVEL_1)
+                    .map(emotion => ({ title: emotion.title, id: emotion.idEmotion })));
+
+                const emotion = await emotionService.getById(id);
+
+                setFormData({
+                    title: emotion.title,
+                    description: emotion.description,
+                    level: emotion.level,
+                    parentEmotionId: emotion.parentEmotionId,
+                    iconUrl: emotion.iconUrl
+                });
+
+                setInitialData({
+                    title: emotion.title,
+                    description: emotion.description,
+                    level: emotion.level,
+                    parentEmotionId: emotion.parentEmotionId,
+                    iconUrl: emotion.iconUrl
+                })
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des émotions:', error);
+            }
+        };
+        fetchEmotions();
+    }, [id]);
+
+    // ========= VALIDATION SCHEMA ======== //
+
+    // ========== VALIDATION ==========
     // Valide UN champ à la fois (quand tu quittes le champ - onBlur)
     const validateField = (name, value) => {
         try {
             // On crée un schéma partiel juste pour ce champ
-            const fieldSchema = createArticleBodySchema.pick({ [name]: true });
+            const fieldSchema = updateEmotionBodySchema.pick({ [name]: true });
             fieldSchema.parse({ [name]: value });
 
 
@@ -123,24 +116,10 @@ const EditArticle = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        if (name === "categories") {
-            const options = e.target.options;
-            const selectedValues = Array.from(options)
-                .filter(option => option.selected)
-                .map(option => option.value);
-
-
-            setFormData(prev => ({
-                ...prev,
-                categories: selectedValues
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value,
-            }));
-        }
-        console.log("formData.categories", formData.categories);
+        setFormData(prev => ({
+            ...prev,
+            [name]: value,
+        }));
     };
 
     // Quand tu quittes un input (validation en temps réel)
@@ -157,7 +136,7 @@ const EditArticle = () => {
             if (!file.type.startsWith('image/')) {
                 setErrors(prev => ({
                     ...prev,
-                    presentationImageUrl: 'Seules les images sont acceptées'
+                    iconUrl: 'Seules les images sont acceptées'
                 }));
                 setSelectedFile(null);
                 return;
@@ -167,7 +146,7 @@ const EditArticle = () => {
             if (file.size > 5 * 1024 * 1024) {
                 setErrors(prev => ({
                     ...prev,
-                    presentationImageUrl: 'Le fichier est trop volumineux (max 5MB)'
+                    iconUrl: 'Le fichier est trop volumineux (max 5MB)'
                 }));
                 setSelectedFile(null);
                 return;
@@ -177,7 +156,7 @@ const EditArticle = () => {
             setSelectedFile(file);
             setErrors(prev => {
                 const newErrors = { ...prev };
-                delete newErrors.presentationImageUrl;
+                delete newErrors.iconUrl;
                 return newErrors;
             });
         }
@@ -193,23 +172,26 @@ const EditArticle = () => {
 
             setLoading(true);
 
-            const validatedData = updateArticleBodySchema.parse(formData);
+            const validatedData = updateEmotionBodySchema.parse(formData);
             setErrors({});
 
             const formDataToSend = new FormData();
             formDataToSend.append('title', validatedData.title);
-            formDataToSend.append('summary', validatedData.summary);
-            formDataToSend.append('content', validatedData.content);
-            formDataToSend.append('status', validatedData.status);
-            formDataToSend.append('categories', JSON.stringify(validatedData.categories));
+            formDataToSend.append('description', validatedData.description);
+            formDataToSend.append('level', validatedData.level);
 
-            if (selectedFile) {
-                formDataToSend.append('presentationImageUrl', selectedFile);
+
+            if (validatedData.parentEmotionId) {
+                formDataToSend.append('parentEmotionId', validatedData.parentEmotionId);
             }
 
-            if (validatedData.removePresentationImage) {
-                formDataToSend.append('removePresentationImage', 'true');
-                setRemovePresentationImage(true);
+            if (selectedFile) {
+                formDataToSend.append('iconUrl', selectedFile);
+            }
+
+            if (removePicture) {
+                formDataToSend.append('removeIcon', 'true');
+                setRemovePicture(true); // reset du state
             }
 
             if (!hasChanges()) {
@@ -218,25 +200,25 @@ const EditArticle = () => {
             }
 
             // 3. Appeler le service backend
-            const updatedArticle = await articleService.update(slug, formDataToSend);
+            const updatedEmotion = await emotionService.update(id, formDataToSend);
 
             // 4. Afficher succès
             setLoading(false);
-            setSuccessMessage(`✅ Article ${updatedArticle.title} mis à jour avec succès !`);
+            setSuccessMessage(`✅ Émotion ${updatedEmotion.title} modifiée avec succès !`);
 
             // 5. Réinitialiser le formulaire
             setFormData({
                 title: '',
-                summary: '',
-                content: '',
-                status: '',
-                categories: []
+                description: '',
+                level: '',
+                parentEmotionId: '',
+                iconUrl: ''
             });
             setSelectedFile(null);
 
             // 6. Rediriger après 2 secondes
             setTimeout(() => {
-                navigate('/admin/articles');
+                navigate('/admin/emotions');
             }, 2000);
 
         } catch (error) {
@@ -277,14 +259,14 @@ const EditArticle = () => {
                     </div>
                 )}
                 <button
-                    onClick={() => navigate('/admin/articles')}
+                    onClick={() => navigate('/admin/emotions')}
                     style={styles.backBtn}
                 >
                     ← Retour
                 </button>
 
                 <form onSubmit={handleSubmit} style={styles.form}>
-                    <h2>Modifier l'article</h2>
+                    <h2>Modifier l'émotion</h2>
 
                     {error && <div style={styles.error}>{error}</div>}
 
@@ -298,115 +280,72 @@ const EditArticle = () => {
                             required
                             style={styles.input}
                             onBlur={handleBlur}
-                            placeholder="Titre de l'article"
+                            placeholder="Titre de l'émotion"
                         />
                     </div>
 
                     <div style={styles.formGroup}>
-                        <label>Résumé</label>
+                        <label>Description</label>
                         <textarea
-                            name="summary"
-                            value={formData.summary}
+                            name="description"
+                            value={formData.description}
                             onChange={handleChange}
                             style={{ ...styles.input, minHeight: '80px' }}
                             onBlur={handleBlur}
-                            placeholder="Résumé court de l'article"
+                            placeholder="Décrivez l'émotion ici"
                         />
-                    </div>
-
-                    <div style={styles.formGroup}>
-                        <label>Contenu *</label>
-                        <textarea
-                            name="content"
-                            value={formData.content}
-                            onChange={handleChange}
-                            required
-                            style={{ ...styles.input, minHeight: '300px' }}
-                            onBlur={handleBlur}
-                            placeholder="Contenu principal de l'article"
-                        />
-                    </div>
-                    <div style={styles.row}>
-                        <div style={styles.formGroup}>
-                            <label>Catégories</label>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px' }}>
-                                {categories.map(cat => (
-                                    <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.categories.includes(cat.slug)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        categories: [...prev.categories, cat.slug]
-                                                    }));
-                                                } else {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        categories: prev.categories.filter(c => c !== cat.slug)
-                                                    }));
-                                                }
-                                            }}
-                                        />
-                                        {cat.title}
-                                    </label>
-                                ))}
-                            </div>
-
-                            {/* <label>Catégories</label>
-                            <select
-                                name="categories"
-                                value={formData.categories}
-                                onChange={handleChange}
-                                style={styles.input}
-                                // onBlur={handleBlur}
-                                multiple
-                            >
-                                <option disabled value="">-- Choisir une ou plusieurs catégories --</option>
-                                {categories.map(category => (
-                                    <option key={category.slug} value={category.slug}>
-                                        {category.title}
-                                    </option>
-                                ))}
-                            </select> */}
-                        </div>
-                        {/* <p style={styles.formGroup}>
-                            Sélectionné : {formData.categories.join(', ')}
-                        </p> */}
                     </div>
 
                     <div style={styles.row}>
                         <div style={styles.formGroup}>
-                            <label>Statut</label>
+                            <label>Niveau *</label>
                             <select
-                                name="status"
-                                value={formData.status}
+                                name="level"
+                                value={formData.level}
                                 onChange={handleChange}
                                 style={styles.input}
                                 onBlur={handleBlur}
                             >
-                                <option value="DRAFT">Brouillon</option>
-                                <option value="PUBLISHED">Publié</option>
-                                <option value="ARCHIVED">Archivé</option>
+                                <option value={LevelEmotionEnum.LEVEL_1}>Emotion principale</option>
+                                <option value={LevelEmotionEnum.LEVEL_2}>Emotion secondaire (sentiment)</option>
                             </select>
                         </div>
 
-                        {/* ===== IMAGE DE PRÉSENTATION ===== */}
+                       
+                        <div style={styles.formGroup}>
+                            <label>Émotion parente</label>
+                            <select disabled={formData.level === LevelEmotionEnum.LEVEL_1} // Désactiver si c'est une émotion de niveau 1
+                                name="parentEmotionId"
+                                value={formData.parentEmotionId || ""}
+                                onChange={handleChange}
+                                style={styles.input}
+                                onBlur={handleBlur}
+                            >
+                                <option value="">-- Choisir une émotion parente --</option>
+                                {parentEmotions.map(emotion => (
+                                    <option key={emotion.id} value={emotion.id}>
+                                        {emotion.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style={styles.row}>
+                        {/* ===== ICÔNE ===== */}
                         <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="presentationImageUrl">Image de présentation (optionnel)</label>
+                            <label htmlFor="iconUrl">Icône de l'émotion</label>
                             <input
-                                id="presentationImageUrl"
+                                id="iconUrl"
                                 type="file"
-                                name="presentationImageUrl"
+                                name="iconUrl"
                                 onChange={handleFileChange}
                                 accept="image/*"
                                 style={{
                                     width: '100%',
                                     padding: '8px',
                                     borderRadius: '4px',
-                                    border: errors.presentationImageUrl ? '2px solid #dc3545' : '1px solid #ddd',
+                                    border: errors.iconUrl ? '2px solid #dc3545' : '1px solid #ddd',
                                     boxSizing: 'border-box',
                                     marginTop: '5px'
                                 }}
@@ -416,19 +355,19 @@ const EditArticle = () => {
                                     ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
                                 </small>
                             )}
-                            {errors.presentationImageUrl && (
+                            {errors.iconUrl && (
                                 <span style={{ color: '#dc3545', fontSize: '12px' }}>
-                                    {errors.presentationImageUrl}
+                                    {errors.iconUrl}
                                 </span>
                             )}
-                            {formData.presentationImageUrl && !selectedFile && (
+                            {formData.iconUrl && !selectedFile && (
                                 <div>
-                                    <img src={`http://localhost:3000${formData.presentationImageUrl}`} width="100" />
+                                    <img src={`http://localhost:3000${formData.iconUrl}`} width="100" />
                                     <button type="button"
                                         onClick={() => {
-                                            setRemovePresentationImage(true);
+                                            setRemovePicture(true);
                                             setSelectedFile(null);
-                                            setFormData(prev => ({ ...prev, presentationImageUrl: null }));
+                                            setFormData(prev => ({ ...prev, iconUrl: null }));
                                         }}
                                     >
                                         Supprimer la photo
@@ -441,26 +380,22 @@ const EditArticle = () => {
                     <div style={styles.actions}>
                         <button
                             type="button"
-                            onClick={() => navigate('/admin/articles')}
+                            onClick={() => navigate('/admin/emotions')}
                             style={{ ...styles.btn, background: '#95a5a6' }}
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || !hasChanges()}
-                            style={{
-                                ...styles.btn,
-                                background: loading || !hasChanges() ? '#ccc' : '#27ae60',
-                                cursor: loading || !hasChanges() ? 'not-allowed' : 'pointer',
-                            }}
+                            disabled={loading || !hasChanges}
+                            style={{ ...styles.btn, background: loading || !hasChanges() ? '#95a5a6' : '#27ae60' }}
                         >
-                            {loading ? 'Mise à jour...' : 'Mettre à jour l\'article'}
+                            {loading ? 'Modification' : 'Modifier l\'émotion'}
                         </button>
                     </div>
                 </form>
-            </div >
-        </AdminLayout >
+            </div>
+        </AdminLayout>
     );
 };
 
@@ -526,4 +461,4 @@ const styles = {
     },
 };
 
-export default EditArticle;
+export default EditEmotion;

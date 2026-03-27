@@ -26,12 +26,3 @@ export const categoryService = {
     return response.data;
   },
 };
-
-/** 
-router.get("/", authMiddleware, roleMiddleware(UserRoleEnum.ADMIN), getAllCategoriesController);
-router.get("/:slug", authMiddleware, roleMiddleware(UserRoleEnum.ADMIN), getCategoryController);
-router.post("/", authMiddleware, roleMiddleware(UserRoleEnum.ADMIN), upload.single("iconUrl"), validate(createCategoryBodySchema, "body"), createCategoryController);
-router.patch("/:slug", authMiddleware, roleMiddleware(UserRoleEnum.ADMIN), upload.single("iconUrl"), validate(updateCategoryBodySchema, "body"), updateCategoryController);
-router.delete("/:slug", authMiddleware, roleMiddleware(UserRoleEnum.ADMIN), deleteCategoryController);
-export default router;
- */
