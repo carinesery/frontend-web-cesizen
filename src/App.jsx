@@ -17,6 +17,11 @@ import EditUser from './pages/EditUser.jsx';
 import CreateCategory from './pages/CreateCategory.jsx';
 import ViewCategory from './pages/ViewCategory.jsx';
 import EditCategory from './pages/EditCategory.jsx';
+import Emotions from './pages/Emotions.jsx';
+import ViewEmotion from './pages/ViewEmotion.jsx';
+import CreateEmotion from './pages/CreateEmotion.jsx';
+// import EditEmotion from './pages/EditEmotion.jsx';
+
 
 function App() {
   return (
@@ -54,6 +59,13 @@ function App() {
           <Route path="/admin/users/create" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
           <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/admin/users/:id/edit" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
+
+
+            <Route path="/admin/emotions" element={<ProtectedRoute><Emotions/></ProtectedRoute>} />
+            <Route path="/admin/emotions/:id" element={<ProtectedRoute><ViewEmotion /></ProtectedRoute>} />
+            <Route path="/admin/emotions/create" element={<ProtectedRoute><CreateEmotion /></ProtectedRoute>} />
+            {/* <Route path="/admin/emotions/:id/edit" element={<ProtectedRoute><EditEmotion /></ProtectedRoute>} /> */}
+
 
           {/* Redirect root to admin */}
           <Route path="/" element={<Navigate to="/admin" replace />} />
