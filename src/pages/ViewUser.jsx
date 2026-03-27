@@ -207,62 +207,69 @@ const ViewUser = () => {
                     </button>
 
                     {/* Bouton Modifier */}
-                    <button
-                        onClick={() => navigate(`/admin/users/${id}/edit`)}
-                        style={{
-                            flex: 1,
-                            padding: '10px 20px',
-                            background: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                        }}
-                    >
-                        ✏️ Modifier
-                    </button>
+                    {!user.deletedAt && (
+                        <button
+                            onClick={() => navigate(`/admin/users/${id}/edit`)}
+                            style={{
+                                flex: 1,
+                                padding: '10px 20px',
+                                background: '#007bff',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '14px'
+                            }}
+                        >
+                            ✏️ Modifier
+                        </button>
+                    )}
 
-                    {/* Bouton Activer/Désactiver */}
-                    <button
-                        onClick={handleToggleStatus}
-                        disabled={actionLoading}
-                        style={{
-                            flex: 1,
-                            padding: '10px 20px',
-                            background: user.isActive ? '#dc3545' : '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: actionLoading ? 'not-allowed' : 'pointer',
-                            fontSize: '14px',
-                            opacity: actionLoading ? 0.7 : 1
-                        }}
-                    >
-                        {user.isActive ? '🔴 Désactiver' : '🟢 Activer'}
-                    </button>
+                    {/* Bouton Désactiver / Activer */}
+                    {!user.deletedAt && (
+                        <button
+                            onClick={handleToggleStatus}
+                            disabled={actionLoading}
+                            style={{
+                                flex: 1,
+                                padding: '10px 20px',
+                                background: user.isActive ? '#dc3545' : '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: actionLoading ? 'not-allowed' : 'pointer',
+                                fontSize: '14px',
+                                opacity: actionLoading ? 0.7 : 1
+                            }}
+                        >
+
+                            {user.isActive ? '🔴 Désactiver' : '🟢 Activer'}
+                        </button>
+                    )}
 
                     {/* Bouton Supprimer */}
-                    <button
-                        onClick={handleDelete}
-                        disabled={actionLoading}
-                        style={{
-                            flex: 1,
-                            padding: '10px 20px',
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: actionLoading ? 'not-allowed' : 'pointer',
-                            fontSize: '14px',
-                            opacity: actionLoading ? 0.7 : 1
-                        }}
-                    >
-                        🗑️ Supprimer
-                    </button>
+                    {!user.deletedAt && (
+                        < button
+                            onClick={handleDelete}
+                            disabled={actionLoading}
+                            style={{
+                                flex: 1,
+                                padding: '10px 20px',
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: actionLoading ? 'not-allowed' : 'pointer',
+                                fontSize: '14px',
+                                opacity: actionLoading ? 0.7 : 1
+                            }}
+                        >
+                            🗑️ Supprimer
+                        </button>
+                    )}
                 </div>
             </div>
-        </AdminLayout>
+        </AdminLayout >
     );
 };
 

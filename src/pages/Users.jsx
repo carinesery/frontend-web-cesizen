@@ -102,21 +102,27 @@ const Users = () => {
                                     onClick={() => navigate(`/admin/users/${user.idUser}`)}
                                 > Voir
                                 </button>
+                                {!user.deletedAt && (
                                 <button
                                     style={styles.btn}
                                     onClick={() => navigate(`/admin/users/${user.idUser}/edit`)}
                                 > Modifier
                                 </button>
+                                )}
+                                {!user.deletedAt && (
                                 <button
                                     style={styles.btn}
                                     onClick={() => handleToggleActive(user)}
                                 >{user.isActive ? 'Désactiver' : 'Activer'}
                                 </button>
+                                )}
+                                {!user.deletedAt && (
                                 <button
                                     style={styles.btn}
                                     onClick={() => handleDeleteUser(user.idUser)}
                                 >Supprimer
                                 </button>
+                                )}
                             </td>
                         </tr>
                     ))}

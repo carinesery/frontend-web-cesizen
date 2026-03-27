@@ -36,7 +36,7 @@ const EditCategory = () => {
             formData.title !== initialData.title ||
             formData.description !== initialData.description ||
             selectedFile !== null ||
-            removePicture // 👈 important
+            removePicture // si l'utilisateur a choisi de supprimer la photo
         );
     };
 
