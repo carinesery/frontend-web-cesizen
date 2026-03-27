@@ -5,8 +5,9 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Articles from './pages/Articles.jsx';
-import ArticleDetail from './pages/ArticleDetail.jsx';
+import ViewArticle from './pages/ViewArticle.jsx';
 import CreateArticle from './pages/CreateArticle.jsx';
+import EditArticle from './pages/EditArticle.jsx';
 import Categories from './pages/Categories.jsx';
 import Users from './pages/Users.jsx';
 import ViewUser from './pages/ViewUser.jsx';
@@ -36,9 +37,9 @@ function App() {
           />
           {/* Routes Articles */}
           <Route path="/admin/articles" element={<ProtectedRoute><Articles /></ProtectedRoute>}/>
-          <Route path="/admin/articles/:slug" element={<ProtectedRoute><ArticleDetail /></ProtectedRoute>}/>
+          <Route path="/admin/articles/:slug" element={<ProtectedRoute><ViewArticle /></ProtectedRoute>}/>
           <Route path="/admin/articles/create" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>}/>
-          {/* <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>}/> */}
+          <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>}/>
 
           {/* Routes Categories */}
           <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>}/>

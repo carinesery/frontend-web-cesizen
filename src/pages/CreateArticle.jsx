@@ -146,6 +146,8 @@ const CreateArticle = () => {
 
     try {
 
+      setLoading(true);
+
       const validatedData = createArticleBodySchema.parse(formData);
       setErrors({});
 
@@ -162,9 +164,9 @@ const CreateArticle = () => {
 
       // 3. Appeler le service backend
       const newArticle = await articleService.create(formDataToSend);
-      console.log('Article créé :', newArticle);
 
       // 4. Afficher succès
+      setLoading(false);
       setSuccessMessage(`✅ Article ${newArticle.title} créé avec succès !`);
 
       // 5. Réinitialiser le formulaire
@@ -181,9 +183,6 @@ const CreateArticle = () => {
       setTimeout(() => {
         navigate('/admin/articles');
       }, 2000);
-
-      setLoading(true);
-      navigate('/admin/articles');
 
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -206,6 +205,17 @@ const CreateArticle = () => {
   return (
     <AdminLayout>
       <div style={styles.container}>
+        {successMessage && (
+          <div style={{
+            background: '#d4edda',
+            color: '#155724',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '20px'
+          }}>
+            {successMessage}
+          </div>
+        )}
         <button
           onClick={() => navigate('/admin/articles')}
           style={styles.backBtn}
@@ -257,8 +267,37 @@ const CreateArticle = () => {
             />
           </div>
           <div style={styles.row}>
-
             <div style={styles.formGroup}>
+              <label>Catégories</label>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px' }}>
+                {categories.map(cat => (
+                  <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.categories.includes(cat.slug)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            categories: [...prev.categories, cat.slug]
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            categories: prev.categories.filter(c => c !== cat.slug)
+                          }));
+                        }
+                      }}
+                    />
+                    {cat.title}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* <div style={styles.formGroup}>
               <label>Catégories</label>
               <select
                 name="categories"
@@ -279,7 +318,7 @@ const CreateArticle = () => {
             <p style={styles.formGroup}>
               Sélectionné : {formData.categories.join(', ')}
             </p>
-          </div>
+          </div> */}
 
           <div style={styles.row}>
             <div style={styles.formGroup}>

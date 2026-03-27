@@ -158,7 +158,7 @@ const EditCategory = () => {
             // 2. Créer FormData pour envoyer fichier + données
             const formDataToSend = new FormData();
             formDataToSend.append('title', validatedData.title);
-            formDataToSend.append('description', validatedData.description || '');
+            formDataToSend.append('description', validatedData.description);
 
             if (selectedFile) {
                 formDataToSend.append('iconUrl', selectedFile);

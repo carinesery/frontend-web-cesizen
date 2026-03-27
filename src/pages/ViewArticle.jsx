@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { articleService } from '../services/articleService.js';
 import AdminLayout from '../components/AdminLayout.jsx';
 
-const ArticleDetail = () => {
+const ViewArticle = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
@@ -30,6 +30,24 @@ const ArticleDetail = () => {
   if (error) return <AdminLayout><div style={{ color: 'red' }}>{error}</div></AdminLayout>;
   if (!article) return <AdminLayout><div>Article non trouvé</div></AdminLayout>;
 
+  const statusLabels = {
+    DRAFT: "Brouillon",
+    PUBLISHED: "Publié",
+    ARCHIVED: "Archivé"
+  };
+
+  const handleDeleteArticle = async () => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+      try {   
+      await articleService.delete(slug);
+      navigate('/admin/articles');
+      } catch (err) {
+        setError('Erreur lors de la suppression de l\'article');
+        console.error(err);
+      }
+    }
+  };
+
   return (
     <AdminLayout>
       <div style={styles.container}>
@@ -39,36 +57,36 @@ const ArticleDetail = () => {
 
         <article style={styles.article}>
           <h1>{article.title}</h1>
-          
+
           {article.presentationImageUrl && (
-            <img 
-              src={article.presentationImageUrl} 
-              alt={article.title} 
+            <img
+              src={`http://localhost:3000${article.presentationImageUrl}`}
+              alt={article.title}
               style={styles.image}
             />
           )}
 
           <div style={styles.meta}>
-            <span>Statut: <strong>{article.status}</strong></span>
+            <span>Statut: <strong>{statusLabels[article.status]}</strong></span>
             <span>Créé: {new Date(article.createdAt).toLocaleDateString('fr-FR')}</span>
             {article.updatedAt && (
               <span>Modifié: {new Date(article.updatedAt).toLocaleDateString('fr-FR')}</span>
             )}
           </div>
 
-          {article.summary && (
+          
             <div style={styles.summary}>
               <h3>Résumé</h3>
               <p>{article.summary}</p>
             </div>
-          )}
+          
 
           <div style={styles.content}>
             <h3>Contenu</h3>
             <p>{article.content}</p>
           </div>
 
-          {article.categories && article.categories.length > 0 && (
+          {/* {article.categories && article.categories.length > 0 && ( */}
             <div style={styles.categories}>
               <h3>Catégories</h3>
               <div style={styles.categoryList}>
@@ -79,16 +97,17 @@ const ArticleDetail = () => {
                 ))}
               </div>
             </div>
-          )}
+          {/* )} */}
 
           <div style={styles.actions}>
-            <button 
+            <button
               onClick={() => navigate(`/admin/articles/${slug}/edit`)}
               style={{ ...styles.btn, background: '#3498db' }}
             >
               ✏️ Éditer
             </button>
-            <button style={{ ...styles.btn, background: '#e74c3c' }}>
+            <button style={{ ...styles.btn, background: '#e74c3c' }}
+            onClick={() => handleDeleteArticle()}>
               🗑️ Supprimer
             </button>
           </div>
@@ -177,4 +196,4 @@ const styles = {
   },
 };
 
-export default ArticleDetail;
+export default ViewArticle;

@@ -36,9 +36,15 @@ const Articles = () => {
       await articleService.delete(slug);
       setArticles(articles.filter(a => a.slug !== slug));
     } catch (err) {
-      setError('Erreur lors de la suppression');
+      setError('Erreur lors de la suppression de l\'article');
       console.error(err);
     }
+  };
+
+  const statusLabels = {
+    DRAFT: "Brouillon",
+    PUBLISHED: "Publié",
+    ARCHIVED: "Archivé"
   };
 
   if (loading) return <AdminLayout><div>Chargement...</div></AdminLayout>;
@@ -49,7 +55,7 @@ const Articles = () => {
       <div style={styles.container}>
         <div style={styles.header}>
           <h2>Articles</h2>
-          <button 
+          <button
             onClick={() => navigate('/admin/articles/create')}
             style={styles.btn}
           >
@@ -75,22 +81,22 @@ const Articles = () => {
                 <tr key={article.idArticle}>
                   <td>{article.title}</td>
                   <td>{article.slug}</td>
-                  <td>{article.status.toLowerCase()}</td>
+                  <td>{statusLabels[article.status]}</td>
                   <td>{article.categories.map(cat => cat.title).join(', ')}</td>
                   <td style={styles.actions}>
-                    <button 
+                    <button
                       onClick={() => navigate(`/admin/articles/${article.slug}`)}
                       style={{ ...styles.btnSmall, background: '#3498db' }}
                     >
                       👁️ Voir
                     </button>
-                    <button 
+                    <button
                       onClick={() => navigate(`/admin/articles/${article.slug}/edit`)}
                       style={{ ...styles.btnSmall, background: '#f39c12' }}
                     >
                       ✏️ Éditer
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDeleteArticle(article.slug)}
                       style={{ ...styles.btnSmall, background: '#e74c3c' }}
                     >
