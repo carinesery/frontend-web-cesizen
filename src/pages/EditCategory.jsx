@@ -36,7 +36,7 @@ const EditCategory = () => {
             formData.title !== initialData.title ||
             formData.description !== initialData.description ||
             selectedFile !== null ||
-            removePicture // 👈 important
+            removePicture // si l'utilisateur a choisi de supprimer la photo
         );
     };
 
@@ -86,7 +86,7 @@ const EditCategory = () => {
                 // Ajouter le message d'erreur Zod
                 setErrors(prev => ({
                     ...prev,
-                    [name]: error.errors[0]?.message || 'Erreur de validation'
+                    [name]: error.issues[0]?.message || 'Erreur de validation'
                 }));
             }
         }
@@ -158,7 +158,7 @@ const EditCategory = () => {
             // 2. Créer FormData pour envoyer fichier + données
             const formDataToSend = new FormData();
             formDataToSend.append('title', validatedData.title);
-            formDataToSend.append('description', validatedData.description || '');
+            formDataToSend.append('description', validatedData.description);
 
             if (selectedFile) {
                 formDataToSend.append('iconUrl', selectedFile);

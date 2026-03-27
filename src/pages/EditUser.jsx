@@ -8,6 +8,7 @@ import AdminLayout from '../components/AdminLayout.jsx';
 const EditUser = () => {
 
     const [loading, setLoading] = useState(true);
+    const [initialData, setInitialData] = useState(null);
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -25,6 +26,19 @@ const EditUser = () => {
 
     const [successMessage, setSuccessMessage] = useState('');
 
+     const hasChanges = () => {
+        if (!initialData) return false;
+
+        return (
+            formData.username !== initialData.username ||
+            formData.email !== initialData.email ||
+            formData.profilPictureUrl !== initialData.profilPictureUrl ||
+            formData.role !== initialData.role ||
+            selectedFile !== null ||
+            removePicture
+        );
+    };
+
 
     // ===== EXISTING USER DATA LOAD ===== //
     useEffect(() => {
@@ -38,7 +52,12 @@ const EditUser = () => {
                     profilPictureUrl: user.profilPictureUrl,
                     role: user.role
                 })
-               
+                setInitialData({
+                    username: user.username,
+                    email: user.email,
+                    profilPictureUrl: user.profilPictureUrl,
+                    role: user.role
+                })
             } catch (error) {
                 console.error('Erreur lors du chargement des données utilisateur:', error);
             } finally {
@@ -57,7 +76,7 @@ const EditUser = () => {
         try {
             // Schéma partiel pour update
             const fieldSchema = adminUpdateUserBodySchema.pick({ [name]: true });
-            fieldSchema.parse({ [name]: value });
+            fieldSchema.parse({ [name]: value});
 
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -68,7 +87,7 @@ const EditUser = () => {
             if (error instanceof z.ZodError) {
                 setErrors(prev => ({
                     ...prev,
-                    [name]: error.errors[0]?.message || 'Erreur de validation'
+                    [name]: error.issues[0]?.message || 'Erreur de validation'
                 }));
             }
         }
@@ -140,6 +159,11 @@ const EditUser = () => {
 
             if (removePicture) {
                 formDataToSend.append('removePicture', 'true');
+            }
+
+             if (!hasChanges()) {
+                setErrors({ submit: 'Aucune modification détectée' });
+                return;
             }
 
             const updatedUser = await userService.update(id, formDataToSend);
@@ -328,15 +352,15 @@ const EditUser = () => {
                     {/* ===== SUBMIT BUTTON ===== */}
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !hasChanges()}
                         style={{
                             width: '100%',
                             padding: '10px',
-                            background: loading ? '#ccc' : '#007bff',
+                            background: loading || !hasChanges() ? '#ccc' : '#007bff',
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
+                            cursor: loading || !hasChanges() ? 'not-allowed' : 'pointer',
                             fontSize: '16px'
                         }}
                     >

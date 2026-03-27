@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { createArticleBodySchema } from '../schemas/articleSchema.js';
+import { categoryService } from '../services/categoryService.js';
 import { articleService } from '../services/articleService.js';
 import AdminLayout from '../components/AdminLayout.jsx';
 
@@ -7,41 +10,193 @@ const CreateArticle = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState([]);
+
   const [formData, setFormData] = useState({
     title: '',
     summary: '',
     content: '',
     status: 'DRAFT',
-    categories: '',  // Chaîne vide, pas array
+    categories: [],
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const [selectedFile, setSelectedFile] = useState(null);
+
+
+  // ========== CHARGEMENT DES CATÉGORIES POUR LE SELECT ========== //
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoryService.getAll();
+        setCategories(data.map(category => ({ title: category.title, slug: category.slug })));
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  console.log("Voici mes catégories:", categories);
+
+  // Les erreurs de validation
+  const [errors, setErrors] = useState({});
+
+  // Message de succès
+  const [successMessage, setSuccessMessage] = useState('');
+
+
+
+  // ========= VALIDATION SCHEMA ======== //
+
+  // ========== VALIDATION ==========
+  // Valide UN champ à la fois (quand tu quittes le champ - onBlur)
+  const validateField = (name, value) => {
+    try {
+      // On crée un schéma partiel juste pour ce champ
+      const fieldSchema = createArticleBodySchema.pick({ [name]: true });
+      fieldSchema.parse({ [name]: value });
+
+
+      // Si valide, enlever l'erreur pour ce champ
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Ajouter le message d'erreur Zod
+        setErrors(prev => ({
+          ...prev,
+          [name]: error.issues[0]?.message || 'Erreur de validation'
+        }));
+      }
+    }
   };
 
+  // ========== HANDLERS ========== //
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "categories") {
+      const options = e.target.options;
+      const selectedValues = Array.from(options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+
+
+      setFormData(prev => ({
+        ...prev,
+        categories: selectedValues
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+    console.log("formData.categories", formData.categories);
+  };
+
+  // Quand tu quittes un input (validation en temps réel)
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    validateField(name, value);
+  };
+
+  // Quand tu sélectionnes un fichier image
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Vérifier que c'est une image
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({
+          ...prev,
+          presentationImageUrl: 'Seules les images sont acceptées'
+        }));
+        setSelectedFile(null);
+        return;
+      }
+
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({
+          ...prev,
+          presentationImageUrl: 'Le fichier est trop volumineux (max 5MB)'
+        }));
+        setSelectedFile(null);
+        return;
+      }
+
+      // OK, on sauvegarde le fichier
+      setSelectedFile(file);
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.presentationImageUrl;
+        return newErrors;
+      });
+    }
+  };
+
+
+  // ========== SUBMISSION ========== //
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setSuccessMessage('');
 
     try {
-      // Optionnel: upload image (pour l'instant, pas d'image)
-      const payload = {
-        ...formData,
-        categories: formData.categories.length > 0 
-          ? formData.categories.split(',').map(s => s.trim())
-          : undefined,
-      };
 
-      await articleService.create(payload);
-      navigate('/admin/articles');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de la création');
-      console.error(err);
+      setLoading(true);
+
+      const validatedData = createArticleBodySchema.parse(formData);
+      setErrors({});
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', validatedData.title);
+      formDataToSend.append('summary', validatedData.summary || '');
+      formDataToSend.append('content', validatedData.content || '');
+      formDataToSend.append('status', validatedData.status || 'DRAFT');
+      formDataToSend.append('categories', JSON.stringify(validatedData.categories || []));
+
+      if (selectedFile) {
+        formDataToSend.append('presentationImageUrl', selectedFile);
+      }
+
+      // 3. Appeler le service backend
+      const newArticle = await articleService.create(formDataToSend);
+
+      // 4. Afficher succès
+      setLoading(false);
+      setSuccessMessage(`✅ Article ${newArticle.title} créé avec succès !`);
+
+      // 5. Réinitialiser le formulaire
+      setFormData({
+        title: '',
+        summary: '',
+        content: '',
+        status: 'DRAFT',
+        categories: []
+      });
+      setSelectedFile(null);
+
+      // 6. Rediriger après 2 secondes
+      setTimeout(() => {
+        navigate('/admin/articles');
+      }, 2000);
+
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const zodErrors = {};
+        error.issues.forEach(err => {
+          const fieldName = err.path?.[0];
+          if (fieldName && !zodErrors[fieldName]) zodErrors[fieldName] = err.message;
+        });
+        setErrors(zodErrors);
+      } else if (error?.response?.data?.message) {
+        setErrors({ submit: error.response.data.message });
+      } else {
+        setErrors({ submit: error.message || 'Erreur inconnue' });
+      }
     } finally {
       setLoading(false);
     }
@@ -50,8 +205,19 @@ const CreateArticle = () => {
   return (
     <AdminLayout>
       <div style={styles.container}>
-        <button 
-          onClick={() => navigate('/admin/articles')} 
+        {successMessage && (
+          <div style={{
+            background: '#d4edda',
+            color: '#155724',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '20px'
+          }}>
+            {successMessage}
+          </div>
+        )}
+        <button
+          onClick={() => navigate('/admin/articles')}
           style={styles.backBtn}
         >
           ← Retour
@@ -71,6 +237,7 @@ const CreateArticle = () => {
               onChange={handleChange}
               required
               style={styles.input}
+              onBlur={handleBlur}
               placeholder="Titre de l'article"
             />
           </div>
@@ -82,6 +249,7 @@ const CreateArticle = () => {
               value={formData.summary}
               onChange={handleChange}
               style={{ ...styles.input, minHeight: '80px' }}
+              onBlur={handleBlur}
               placeholder="Résumé court de l'article"
             />
           </div>
@@ -94,18 +262,73 @@ const CreateArticle = () => {
               onChange={handleChange}
               required
               style={{ ...styles.input, minHeight: '300px' }}
+              onBlur={handleBlur}
               placeholder="Contenu principal de l'article"
             />
           </div>
+          <div style={styles.row}>
+            <div style={styles.formGroup}>
+              <label>Catégories</label>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px' }}>
+                {categories.map(cat => (
+                  <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.categories.includes(cat.slug)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            categories: [...prev.categories, cat.slug]
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            categories: prev.categories.filter(c => c !== cat.slug)
+                          }));
+                        }
+                      }}
+                    />
+                    {cat.title}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* <div style={styles.formGroup}>
+              <label>Catégories</label>
+              <select
+                name="categories"
+                value={formData.categories}
+                onChange={handleChange}
+                style={styles.input}
+                // onBlur={handleBlur}
+                multiple
+              >
+                <option disabled value="">-- Choisir une ou plusieurs catégories --</option>
+                {categories.map(category => (
+                  <option key={category.slug} value={category.slug}>
+                    {category.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p style={styles.formGroup}>
+              Sélectionné : {formData.categories.join(', ')}
+            </p>
+          </div> */}
 
           <div style={styles.row}>
             <div style={styles.formGroup}>
               <label>Statut</label>
-              <select 
-                name="status" 
-                value={formData.status} 
+              <select
+                name="status"
+                value={formData.status}
                 onChange={handleChange}
                 style={styles.input}
+                onBlur={handleBlur}
               >
                 <option value="DRAFT">Brouillon</option>
                 <option value="PUBLISHED">Publié</option>
@@ -113,33 +336,51 @@ const CreateArticle = () => {
               </select>
             </div>
 
-            <div style={styles.formGroup}>
-              <label>Catégories (séparées par des virgules)</label>
+            {/* ===== IMAGE DE PRÉSENTATION ===== */}
+            <div style={{ marginBottom: '15px' }}>
+              <label htmlFor="presentationImageUrl">Image de présentation (optionnel)</label>
               <input
-                type="text"
-                name="categories"
-                value={formData.categories}
-                onChange={handleChange}
-                style={styles.input}
-                placeholder="tech, lifestyle, education"
+                id="presentationImageUrl"
+                type="file"
+                name="presentationImageUrl"
+                onChange={handleFileChange}
+                accept="image/*"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  border: errors.presentationImageUrl ? '2px solid #dc3545' : '1px solid #ddd',
+                  boxSizing: 'border-box',
+                  marginTop: '5px'
+                }}
               />
+              {selectedFile && (
+                <small style={{ display: 'block', marginTop: '5px', color: '#28a745' }}>
+                  ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
+                </small>
+              )}
+              {errors.presentationImageUrl && (
+                <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                  {errors.presentationImageUrl}
+                </span>
+              )}
             </div>
           </div>
 
           <div style={styles.actions}>
-            <button 
+            <button
               type="button"
               onClick={() => navigate('/admin/articles')}
               style={{ ...styles.btn, background: '#95a5a6' }}
             >
               Annuler
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               style={{ ...styles.btn, background: '#27ae60' }}
             >
-              {loading ? 'Création...' : '✓ Créer l\'article'}
+              {loading ? 'Création...' : 'Créer l\'article'}
             </button>
           </div>
         </form>
