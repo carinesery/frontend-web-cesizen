@@ -340,6 +340,7 @@ const EditUser = () => {
                                 <button type="button"
                                     onClick={() => {
                                         setRemovePicture(true);
+                                        setSelectedFile(null);
                                         setFormData(prev => ({ ...prev, profilPictureUrl: null }));
                                     }}
                                 >

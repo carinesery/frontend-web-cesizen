@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { set, z } from 'zod';
+import { z } from 'zod';
 import { categoryService } from '../services/categoryService.js';
 import AdminLayout from '../components/AdminLayout.jsx';
 import { updateCategoryBodySchema } from '../schemas/categorySchema.ts';
@@ -271,7 +271,6 @@ const EditCategory = () => {
                             placeholder="Décrivez ici la catégorie"
                             style={{
                                 width: '100%',
-                                // height: '100px',
                                 padding: '8px',
                                 borderRadius: '4px',
                                 border: errors.description ? '2px solid #dc3545' : '1px solid #ddd',
@@ -321,6 +320,7 @@ const EditCategory = () => {
                                 <button type="button"
                                     onClick={() => {
                                         setRemovePicture(true);
+                                        setSelectedFile(null);
                                         setFormData(prev => ({ ...prev, iconUrl: null }));
                                     }}
                                 >
@@ -328,7 +328,6 @@ const EditCategory = () => {
                                 </button>
                             </div>
                         )}
-
                     </div>
 
                     {/* ===== SUBMIT BUTTON ===== */}

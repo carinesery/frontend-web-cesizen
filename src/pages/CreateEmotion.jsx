@@ -214,11 +214,7 @@ const CreateEmotion = () => {
                         {errors.submit}
                     </div>
                 )}
-                {/* {Object.entries(errors).map(([key, value]) => (
-                    <div key={key} style={{ color: 'red' }}>
-                        {key}: {value}
-                    </div>
-                ))} */}
+
                 <button
                     onClick={() => navigate('/admin/emotions')}
                     style={styles.backBtn}
@@ -257,64 +253,10 @@ const CreateEmotion = () => {
                         />
                     </div>
 
-                    {/* <div style={styles.row}>
-            <div style={styles.formGroup}>
-              <label>Catégories</label>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px' }}>
-                {categories.map(cat => (
-                  <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.categories.includes(cat.slug)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: [...prev.categories, cat.slug]
-                          }));
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: prev.categories.filter(c => c !== cat.slug)
-                          }));
-                        }
-                      }}
-                    />
-                    {cat.title}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div> */}
-
-                    {/* <div style={styles.formGroup}>
-              <label>Catégories</label>
-              <select
-                name="categories"
-                value={formData.categories}
-                onChange={handleChange}
-                style={styles.input}
-                // onBlur={handleBlur}
-                multiple
-              >
-                <option disabled value="">-- Choisir une ou plusieurs catégories --</option>
-                {categories.map(category => (
-                  <option key={category.slug} value={category.slug}>
-                    {category.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p style={styles.formGroup}>
-              Sélectionné : {formData.categories.join(', ')}
-            </p>
-          </div> */}
-
                     <div style={styles.row}>
                         <div style={styles.formGroup}>
                             <label>Niveau</label>
-                            <select
+                            <select 
                                 name="level"
                                 value={formData.level}
                                 onChange={handleChange}
@@ -329,7 +271,7 @@ const CreateEmotion = () => {
                         {/* {formData.level === LevelEmotionEnum.LEVEL_2 && ( */}
                         <div style={styles.formGroup}>
                             <label>Émotion parente</label>
-                            <select
+                            <select disabled={formData.level === LevelEmotionEnum.LEVEL_1} // Désactiver si c'est une émotion de niveau 1
                                 name="parentEmotionId"
                                 value={formData.parentEmotionId}
                                 onChange={handleChange}
@@ -382,7 +324,7 @@ const CreateEmotion = () => {
                     <div style={styles.actions}>
                         <button
                             type="button"
-                            onClick={() => navigate('/admin/articles')}
+                            onClick={() => navigate('/admin/emotions')}
                             style={{ ...styles.btn, background: '#95a5a6' }}
                         >
                             Annuler
@@ -392,7 +334,7 @@ const CreateEmotion = () => {
                             disabled={loading}
                             style={{ ...styles.btn, background: '#27ae60' }}
                         >
-                            {loading ? 'Création...' : 'Créer l\'article'}
+                            {loading ? 'Création...' : 'Créer l\'émotion'}
                         </button>
                     </div>
                 </form>

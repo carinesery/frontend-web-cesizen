@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { updateEmotionBodySchema } from '../schemas/emotionSchema.js';
 import { emotionService } from '../services/emotionService.js';
@@ -8,18 +8,45 @@ import { LevelEmotionEnum } from '../schemas/emotionSchema.ts';
 
 const EditEmotion = () => {
     const navigate = useNavigate();
+    const { id } = useParams();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [parentEmotions, setParentEmotions] = useState([]);
+    const [initialData, setInitialData] = useState(null);
+    const [removePicture, setRemovePicture] = useState(false);
+
 
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        level: LevelEmotionEnum.LEVEL_1,
-        parentEmotionId: undefined,
+        level: '',
+        parentEmotionId: '',
+        iconUrl: '',
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
+
+
+    // Les erreurs de validation
+    const [errors, setErrors] = useState({});
+
+    // Message de succès
+    const [successMessage, setSuccessMessage] = useState('');
+
+
+    // Fonction pour vérifier s'il y a des changements dans le formulaire
+    const hasChanges = () => {
+        if (!initialData) return false;
+
+        return (
+            formData.title !== initialData.title ||
+            formData.description !== initialData.description ||
+            formData.parentEmotionId !== initialData.parentEmotionId ||
+            formData.level !== initialData.level ||
+            selectedFile !== null ||
+            removePicture // si l'utilisateur a choisi de supprimer la photo
+        );
+    };
 
 
     // ========== CHARGEMENT DES ÉMOTIONS POUR LE SELECT ========== //
@@ -31,22 +58,31 @@ const EditEmotion = () => {
                 setParentEmotions(data
                     .filter(emotion => emotion.level === LevelEmotionEnum.LEVEL_1)
                     .map(emotion => ({ title: emotion.title, id: emotion.idEmotion })));
+
+                const emotion = await emotionService.getById(id);
+
+                setFormData({
+                    title: emotion.title,
+                    description: emotion.description,
+                    level: emotion.level,
+                    parentEmotionId: emotion.parentEmotionId,
+                    iconUrl: emotion.iconUrl
+                });
+
+                setInitialData({
+                    title: emotion.title,
+                    description: emotion.description,
+                    level: emotion.level,
+                    parentEmotionId: emotion.parentEmotionId,
+                    iconUrl: emotion.iconUrl
+                })
+
             } catch (error) {
                 console.error('Erreur lors du chargement des émotions:', error);
             }
         };
         fetchEmotions();
-    }, []);
-
-    console.log("Voici mes émotions de niveau 1:", parentEmotions);
-
-    // Les erreurs de validation
-    const [errors, setErrors] = useState({});
-
-    // Message de succès
-    const [successMessage, setSuccessMessage] = useState('');
-
-
+    }, [id]);
 
     // ========= VALIDATION SCHEMA ======== //
 
@@ -66,7 +102,6 @@ const EditEmotion = () => {
                 return newErrors;
             });
         } catch (error) {
-            console.log("ERREUR SUBMIT:", error);
             if (error instanceof z.ZodError) {
                 // Ajouter le message d'erreur Zod
                 setErrors(prev => ({
@@ -85,8 +120,6 @@ const EditEmotion = () => {
             ...prev,
             [name]: value,
         }));
-
-        console.log("formData", formData);
     };
 
     // Quand tu quittes un input (validation en temps réel)
@@ -145,7 +178,7 @@ const EditEmotion = () => {
             const formDataToSend = new FormData();
             formDataToSend.append('title', validatedData.title);
             formDataToSend.append('description', validatedData.description);
-            formDataToSend.append('level', validatedData.level || LevelEmotionEnum.LEVEL_1);
+            formDataToSend.append('level', validatedData.level);
 
 
             if (validatedData.parentEmotionId) {
@@ -156,19 +189,30 @@ const EditEmotion = () => {
                 formDataToSend.append('iconUrl', selectedFile);
             }
 
+            if (removePicture) {
+                formDataToSend.append('removeIcon', 'true');
+                setRemovePicture(true); // reset du state
+            }
+
+            if (!hasChanges()) {
+                setErrors({ submit: 'Aucune modification détectée' });
+                return;
+            }
+
             // 3. Appeler le service backend
-            const newEmotion = await emotionService.create(formDataToSend);
+            const updatedEmotion = await emotionService.update(id, formDataToSend);
 
             // 4. Afficher succès
             setLoading(false);
-            setSuccessMessage(`✅ Émotion ${newEmotion.title} créée avec succès !`);
+            setSuccessMessage(`✅ Émotion ${updatedEmotion.title} modifiée avec succès !`);
 
             // 5. Réinitialiser le formulaire
             setFormData({
                 title: '',
                 description: '',
-                level: LevelEmotionEnum.LEVEL_1,
-                parentEmotionId: undefined,
+                level: '',
+                parentEmotionId: '',
+                iconUrl: ''
             });
             setSelectedFile(null);
 
@@ -214,11 +258,6 @@ const EditEmotion = () => {
                         {errors.submit}
                     </div>
                 )}
-                {/* {Object.entries(errors).map(([key, value]) => (
-                    <div key={key} style={{ color: 'red' }}>
-                        {key}: {value}
-                    </div>
-                ))} */}
                 <button
                     onClick={() => navigate('/admin/emotions')}
                     style={styles.backBtn}
@@ -227,7 +266,7 @@ const EditEmotion = () => {
                 </button>
 
                 <form onSubmit={handleSubmit} style={styles.form}>
-                    <h2>Créer une nouvelle émotion</h2>
+                    <h2>Modifier l'émotion</h2>
 
                     {error && <div style={styles.error}>{error}</div>}
 
@@ -257,63 +296,9 @@ const EditEmotion = () => {
                         />
                     </div>
 
-                    {/* <div style={styles.row}>
-            <div style={styles.formGroup}>
-              <label>Catégories</label>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px' }}>
-                {categories.map(cat => (
-                  <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.categories.includes(cat.slug)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: [...prev.categories, cat.slug]
-                          }));
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: prev.categories.filter(c => c !== cat.slug)
-                          }));
-                        }
-                      }}
-                    />
-                    {cat.title}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div> */}
-
-                    {/* <div style={styles.formGroup}>
-              <label>Catégories</label>
-              <select
-                name="categories"
-                value={formData.categories}
-                onChange={handleChange}
-                style={styles.input}
-                // onBlur={handleBlur}
-                multiple
-              >
-                <option disabled value="">-- Choisir une ou plusieurs catégories --</option>
-                {categories.map(category => (
-                  <option key={category.slug} value={category.slug}>
-                    {category.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p style={styles.formGroup}>
-              Sélectionné : {formData.categories.join(', ')}
-            </p>
-          </div> */}
-
                     <div style={styles.row}>
                         <div style={styles.formGroup}>
-                            <label>Niveau</label>
+                            <label>Niveau *</label>
                             <select
                                 name="level"
                                 value={formData.level}
@@ -326,12 +311,12 @@ const EditEmotion = () => {
                             </select>
                         </div>
 
-                        {/* {formData.level === LevelEmotionEnum.LEVEL_2 && ( */}
+                       
                         <div style={styles.formGroup}>
                             <label>Émotion parente</label>
-                            <select
+                            <select disabled={formData.level === LevelEmotionEnum.LEVEL_1} // Désactiver si c'est une émotion de niveau 1
                                 name="parentEmotionId"
-                                value={formData.parentEmotionId}
+                                value={formData.parentEmotionId || ""}
                                 onChange={handleChange}
                                 style={styles.input}
                                 onBlur={handleBlur}
@@ -344,13 +329,12 @@ const EditEmotion = () => {
                                 ))}
                             </select>
                         </div>
-                        {/* )} */}
                     </div>
 
                     <div style={styles.row}>
                         {/* ===== ICÔNE ===== */}
                         <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="iconUrl">Icône (optionnelle)</label>
+                            <label htmlFor="iconUrl">Icône de l'émotion</label>
                             <input
                                 id="iconUrl"
                                 type="file"
@@ -376,23 +360,37 @@ const EditEmotion = () => {
                                     {errors.iconUrl}
                                 </span>
                             )}
+                            {formData.iconUrl && !selectedFile && (
+                                <div>
+                                    <img src={`http://localhost:3000${formData.iconUrl}`} width="100" />
+                                    <button type="button"
+                                        onClick={() => {
+                                            setRemovePicture(true);
+                                            setSelectedFile(null);
+                                            setFormData(prev => ({ ...prev, iconUrl: null }));
+                                        }}
+                                    >
+                                        Supprimer la photo
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     <div style={styles.actions}>
                         <button
                             type="button"
-                            onClick={() => navigate('/admin/articles')}
+                            onClick={() => navigate('/admin/emotions')}
                             style={{ ...styles.btn, background: '#95a5a6' }}
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
-                            style={{ ...styles.btn, background: '#27ae60' }}
+                            disabled={loading || !hasChanges}
+                            style={{ ...styles.btn, background: loading || !hasChanges() ? '#95a5a6' : '#27ae60' }}
                         >
-                            {loading ? 'Création...' : 'Créer l\'article'}
+                            {loading ? 'Modification' : 'Modifier l\'émotion'}
                         </button>
                     </div>
                 </form>

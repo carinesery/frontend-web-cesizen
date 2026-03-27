@@ -83,9 +83,11 @@ const Emotions = () => {
                       style={{ ...styles.btnSmall, background: '#3498db' }}
                       onClick={() => navigate(`/admin/emotions/${emotion.idEmotion}/edit`)}
                     >Éditer</button>
+                    {emotion.childEmotions.length === 0 && (
                     <button style={{ ...styles.btnSmall, background: '#e74c3c' }}
                       onClick={() => handleDeleteEmotion(emotion.idEmotion)}
                     >Supprimer</button>
+                    )}
                   </td>
                 </tr>
               ))}

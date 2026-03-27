@@ -20,7 +20,7 @@ import EditCategory from './pages/EditCategory.jsx';
 import Emotions from './pages/Emotions.jsx';
 import ViewEmotion from './pages/ViewEmotion.jsx';
 import CreateEmotion from './pages/CreateEmotion.jsx';
-// import EditEmotion from './pages/EditEmotion.jsx';
+import EditEmotion from './pages/EditEmotion.jsx';
 
 
 function App() {
@@ -41,30 +41,29 @@ function App() {
             }
           />
           {/* Routes Articles */}
-          <Route path="/admin/articles" element={<ProtectedRoute><Articles /></ProtectedRoute>}/>
-          <Route path="/admin/articles/:slug" element={<ProtectedRoute><ViewArticle /></ProtectedRoute>}/>
-          <Route path="/admin/articles/create" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>}/>
-          <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>}/>
+          <Route path="/admin/articles" element={<ProtectedRoute><Articles /></ProtectedRoute>} />
+          <Route path="/admin/articles/:slug" element={<ProtectedRoute><ViewArticle /></ProtectedRoute>} />
+          <Route path="/admin/articles/create" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>} />
+          <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
 
           {/* Routes Categories */}
-          <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>}/>
+          <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
           <Route path="/admin/categories/create" element={<ProtectedRoute><CreateCategory /></ProtectedRoute>} />
           <Route path="/admin/categories/:slug" element={<ProtectedRoute><ViewCategory /></ProtectedRoute>} />
           <Route path="/admin/categories/:slug/edit" element={<ProtectedRoute><EditCategory /></ProtectedRoute>} />
 
           {/* Routes Users */}
-          {/* A créer après : CreateUser & EditUser */}
           <Route path="/admin/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
           <Route path="/admin/users/:id" element={<ProtectedRoute><ViewUser /></ProtectedRoute>} />
           <Route path="/admin/users/create" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
           <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/admin/users/:id/edit" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
 
-
-            <Route path="/admin/emotions" element={<ProtectedRoute><Emotions/></ProtectedRoute>} />
-            <Route path="/admin/emotions/:id" element={<ProtectedRoute><ViewEmotion /></ProtectedRoute>} />
-            <Route path="/admin/emotions/create" element={<ProtectedRoute><CreateEmotion /></ProtectedRoute>} />
-            {/* <Route path="/admin/emotions/:id/edit" element={<ProtectedRoute><EditEmotion /></ProtectedRoute>} /> */}
+          {/* Routes Emotions */}
+          <Route path="/admin/emotions" element={<ProtectedRoute><Emotions /></ProtectedRoute>} />
+          <Route path="/admin/emotions/:id" element={<ProtectedRoute><ViewEmotion /></ProtectedRoute>} />
+          <Route path="/admin/emotions/create" element={<ProtectedRoute><CreateEmotion /></ProtectedRoute>} />
+          <Route path="/admin/emotions/:id/edit" element={<ProtectedRoute><EditEmotion /></ProtectedRoute>} />
 
 
           {/* Redirect root to admin */}

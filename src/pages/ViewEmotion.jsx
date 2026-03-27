@@ -35,12 +35,12 @@ const ViewEmotion = () => {
 
     // ========== ACTIONS POUR AMELIORER L'UX ========== //
 
-    const handleDeleteEmotion = async (slug) => {
+    const handleDeleteEmotion = async (id) => {
         if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette émotion ?')) return;
 
         try {
             setActionLoading(true);
-            await emotionService.delete(slug);
+            await emotionService.delete(id);
             navigate('/admin/emotions');
         } catch (err) {
             alert('Erreur lors de la suppression');
@@ -166,7 +166,7 @@ const ViewEmotion = () => {
 
                     {/* Bouton Modifier */}
                     <button
-                        onClick={() => navigate(`/admin/emotions/${slug}/edit`)}
+                        onClick={() => navigate(`/admin/emotions/${id}/edit`)}
                         style={{
                             flex: 1,
                             padding: '10px 20px',
@@ -182,8 +182,9 @@ const ViewEmotion = () => {
                     </button>
 
                     {/* Bouton Supprimer */}
+                     {emotion.childEmotions.length === 0 && (
                     <button
-                        onClick={() => handleDeleteEmotion(slug)}
+                        onClick={() => handleDeleteEmotion(id)}
                         disabled={actionLoading}
                         style={{
                             flex: 1,
@@ -199,6 +200,7 @@ const ViewEmotion = () => {
                     >
                         🗑️ Supprimer
                     </button>
+                     )}
                 </div>
             </div>
         </AdminLayout>

@@ -69,7 +69,7 @@ const EditArticle = () => {
 
         fetchArticle();
         fetchCategories();
-    }, []);
+    }, [slug]);
 
     // Les erreurs de validation
     const [errors, setErrors] = useState({});
@@ -271,6 +271,11 @@ const EditArticle = () => {
                         {successMessage}
                     </div>
                 )}
+                {errors.submit && (
+                    <div style={styles.error}>
+                        {errors.submit}
+                    </div>
+                )}
                 <button
                     onClick={() => navigate('/admin/articles')}
                     style={styles.backBtn}
@@ -422,6 +427,7 @@ const EditArticle = () => {
                                     <button type="button"
                                         onClick={() => {
                                             setRemovePresentationImage(true);
+                                            setSelectedFile(null);
                                             setFormData(prev => ({ ...prev, presentationImageUrl: null }));
                                         }}
                                     >
