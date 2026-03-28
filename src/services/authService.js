@@ -14,4 +14,9 @@ export const authService = {
   },
 
   getToken: () => localStorage.getItem('token'),
+
+  refreshToken: async () => {
+    const response = await apiClient.post('/auth/refresh-token');
+    return response.data;
+  },
 };
