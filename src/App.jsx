@@ -21,6 +21,7 @@ import Emotions from './pages/Emotions.jsx';
 import ViewEmotion from './pages/ViewEmotion.jsx';
 import CreateEmotion from './pages/CreateEmotion.jsx';
 import EditEmotion from './pages/EditEmotion.jsx';
+import Page403 from './pages/Page403.jsx';
 
 
 function App() {
@@ -30,40 +31,35 @@ function App() {
         <Routes>
           {/* Public route */}
           <Route path="/login" element={<Login />} />
+          <Route path="/403" element={<Page403 />} />
+          <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
 
           {/* Protected routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Dashboard /></ProtectedRoute>}/>
+
           {/* Routes Articles */}
-          <Route path="/admin/articles" element={<ProtectedRoute><Articles /></ProtectedRoute>} />
-          <Route path="/admin/articles/:slug" element={<ProtectedRoute><ViewArticle /></ProtectedRoute>} />
-          <Route path="/admin/articles/create" element={<ProtectedRoute><CreateArticle /></ProtectedRoute>} />
-          <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
+          <Route path="/admin/articles" element={<ProtectedRoute requiredRole="admin"><Articles /></ProtectedRoute>} />
+          <Route path="/admin/articles/:slug" element={<ProtectedRoute requiredRole="admin"><ViewArticle /></ProtectedRoute>} />
+          <Route path="/admin/articles/create" element={<ProtectedRoute requiredRole="admin"><CreateArticle /></ProtectedRoute>} />
+          <Route path="/admin/articles/:slug/edit" element={<ProtectedRoute requiredRole="admin"><EditArticle /></ProtectedRoute>} />
 
           {/* Routes Categories */}
-          <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
-          <Route path="/admin/categories/create" element={<ProtectedRoute><CreateCategory /></ProtectedRoute>} />
-          <Route path="/admin/categories/:slug" element={<ProtectedRoute><ViewCategory /></ProtectedRoute>} />
-          <Route path="/admin/categories/:slug/edit" element={<ProtectedRoute><EditCategory /></ProtectedRoute>} />
+          <Route path="/admin/categories" element={<ProtectedRoute requiredRole="admin"><Categories /></ProtectedRoute>} />
+          <Route path="/admin/categories/create" element={<ProtectedRoute requiredRole="admin"><CreateCategory /></ProtectedRoute>} />
+          <Route path="/admin/categories/:slug" element={<ProtectedRoute requiredRole="admin"><ViewCategory /></ProtectedRoute>} />
+          <Route path="/admin/categories/:slug/edit" element={<ProtectedRoute requiredRole="admin"><EditCategory /></ProtectedRoute>} />
 
           {/* Routes Users */}
-          <Route path="/admin/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-          <Route path="/admin/users/:id" element={<ProtectedRoute><ViewUser /></ProtectedRoute>} />
-          <Route path="/admin/users/create" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
-          <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
-          <Route path="/admin/users/:id/edit" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><Users /></ProtectedRoute>} />
+          <Route path="/admin/users/:id" element={<ProtectedRoute requiredRole="admin"><ViewUser /></ProtectedRoute>} />
+          <Route path="/admin/users/create" element={<ProtectedRoute requiredRole="admin"><CreateUser /></ProtectedRoute>} />
+          <Route path="/admin/users/:id/edit" element={<ProtectedRoute requiredRole="admin"><EditUser /></ProtectedRoute>} />
 
           {/* Routes Emotions */}
-          <Route path="/admin/emotions" element={<ProtectedRoute><Emotions /></ProtectedRoute>} />
-          <Route path="/admin/emotions/:id" element={<ProtectedRoute><ViewEmotion /></ProtectedRoute>} />
-          <Route path="/admin/emotions/create" element={<ProtectedRoute><CreateEmotion /></ProtectedRoute>} />
-          <Route path="/admin/emotions/:id/edit" element={<ProtectedRoute><EditEmotion /></ProtectedRoute>} />
+          <Route path="/admin/emotions" element={<ProtectedRoute requiredRole="admin"><Emotions /></ProtectedRoute>} />
+          <Route path="/admin/emotions/:id" element={<ProtectedRoute requiredRole="admin"><ViewEmotion /></ProtectedRoute>} />
+          <Route path="/admin/emotions/create" element={<ProtectedRoute requiredRole="admin"><CreateEmotion /></ProtectedRoute>} />
+          <Route path="/admin/emotions/:id/edit" element={<ProtectedRoute requiredRole="admin"><EditEmotion /></ProtectedRoute>} />
 
 
           {/* Redirect root to admin */}

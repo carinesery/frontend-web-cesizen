@@ -10,12 +10,31 @@ export const AuthProvider = ({ children }) => {
 
   // Récupérer le token au chargement
   useEffect(() => {
-    const storedToken = authService.getToken();
-    if (storedToken) {
-      setToken(storedToken);
-      // Optionnel : récupérer les infos du user depuis l'API
-    }
-    setLoading(false);
+    const initAuth = async () => {
+      try {
+        const storedToken = authService.getToken();
+
+        if (storedToken) {
+          // ici on n'ajoute pas en plus un && user.role === "admin" pour vérifier le role du user ?
+          //  refresh pour récupérer nouvel accessToken + user
+          const { accessToken, user } = await authService.refreshToken();
+          setToken(accessToken);
+
+          if (user) {
+            setUser(user);
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'initialisation de l'authentification", error);
+        authService.logout();
+        setUser(null);
+        setToken(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email, password) => {
