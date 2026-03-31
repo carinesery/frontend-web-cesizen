@@ -13,7 +13,7 @@ export const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" replace />;
   }
 
-   // Vérification du rôle
+  // Vérification du rôle
   if (requiredRole && (!user || user.role.toUpperCase() !== requiredRole.toUpperCase())) {
     console.log("Accès refusé : rôle requis", requiredRole, "rôle actuel", user?.role);
     return <Navigate to="/403" />;
