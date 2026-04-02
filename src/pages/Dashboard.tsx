@@ -82,7 +82,14 @@ const Dashboard = () => {
     <AdminLayout>
       <div style={styles.container}>
         {/* Bienvenue */}
-        <h2 style={styles.welcomeText}>Bienvenue, {user?.username || 'Admin'} 👋</h2>
+        <h2 style={styles.dashboardTitle}>Dashboard</h2>
+
+        {/* <div style={styles.quoteSection}>
+          <p style={styles.quoteText}>
+            « Chaque jour est une nouvelle chance de devenir la meilleure version de soi-même. »
+          </p>
+          <span style={styles.quoteAuthor}>— Anonyme</span>
+        </div> */}
 
         {/* Cartes statistiques */}
         <div style={styles.cardsRow}>
@@ -113,12 +120,6 @@ const Dashboard = () => {
         </div>
 
         {/* Citation inspirante */}
-        <div style={styles.quoteSection}>
-          <p style={styles.quoteText}>
-            « Chaque jour est une nouvelle chance de devenir la meilleure version de soi-même. »
-          </p>
-          <span style={styles.quoteAuthor}>— Anonyme</span>
-        </div>
       </div>
     </AdminLayout>
   );
@@ -132,9 +133,11 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '16px 24px',
     height: '100%',
     alignItems: 'center',
-    gap: '6rem', 
+    gap: '6rem',
   },
-
+  dashboardTitle: {
+    alignSelf: 'flex-start',
+  },
   welcomeText: {
     fontSize: '28px',
     fontFamily: 'Inter, sans-serif',

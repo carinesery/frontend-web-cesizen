@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { COLORS, SPACING } from '../constants/themes';
 import { IoDocumentTextOutline, IoBookmarksOutline, IoHappyOutline, IoPeopleOutline, IoStatsChartOutline, IoLogOutOutline } from 'react-icons/io5';
-import logoCesizen from '../assets/images/logo-cesizen.png';
+import logoCesizen from '../assets/images/logo-cesizen-fond-moyen.png';
 import lotusViolet from '../assets/images/lotus-violet.png';
 import logoMinistere from '../assets/images/logo-ministere-sante.png';
 
@@ -14,7 +14,9 @@ const NavItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; label
 
   return (
     <Link to={to} style={{ ...styles.navLink, ...(isActive ? styles.navLinkActive : {}) }}>
-      {React.cloneElement(icon as React.ReactElement, { color: isActive ? COLORS.primary : COLORS.neutral.black })}
+      {React.isValidElement(icon)
+        ? React.cloneElement(icon as React.ReactElement<any>, { style: { ...((icon as any).props?.style || {}), color: isActive ? COLORS.primary : COLORS.neutral.black } })
+        : icon}
       {label}
     </Link>
   );
@@ -60,7 +62,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     <div style={styles.container}>
       {/* Header */}
       <header style={styles.header}>
-        </header>
+        {/* <span style={styles.separator}></span> */}
+        <div style={styles.quoteSection}>
+          <p style={styles.quoteText}>
+            « Chaque jour est une nouvelle chance de devenir la meilleure version de soi-même. »
+          </p>
+          <span style={styles.quoteAuthor}>— Anonyme</span>
+        </div>
+        {/* <h2 style={styles.welcomeText}>Bienvenue, {user?.username || 'Admin'} !</h2> */}
+      </header>
       {/* Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
@@ -89,7 +99,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Main Content */}
       <main style={styles.main}>
-        
+
         <div style={styles.content}>
           {children}
         </div>
@@ -109,9 +119,34 @@ const styles: Record<string, React.CSSProperties> = {
     `,
     height: '100vh',
     // backgroundColor: COLORS.neutral.white,
-     background: `linear-gradient(to bottom, ${COLORS.softAqua}, ${COLORS.softViolet})`,
+    background: `linear-gradient(to bottom, ${COLORS.softAqua}, ${COLORS.softViolet})`,
   },
-  
+  // Citation
+  quoteSection: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '0 40px',
+  },
+  quoteText: {
+    fontSize: '16px',
+    fontFamily: 'Inter, sans-serif',
+    fontWeight: 700,
+    fontStyle: 'italic',
+    color: COLORS.primary,
+    lineHeight: 1.6,
+    margin: 0,
+    textAlign: 'center' as const,
+  },
+  quoteAuthor: {
+    fontSize: '14px',
+    fontFamily: 'Inter, sans-serif',
+    fontWeight: 600,
+    fontStyle: 'normal',
+    color: COLORS.accent,
+  },
+
   sidebar: {
     gridArea: 'aside',
     width: '320px',
@@ -120,10 +155,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
     overflowY: 'auto',
     display: 'flex',
-    flexDirection: 'column',  
+    flexDirection: 'column',
   },
   sidebarHeader: {
-   padding : '32px 16px',
+    padding: '32px 16px',
     display: 'flex',
     // flexDirection: 'column',
     alignItems: 'center',
@@ -137,7 +172,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   logo: {
-    width: '72px',
+    width: '80px',
   },
   containerTitle: {
     display: 'flex',
@@ -154,11 +189,11 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0',
   },
   subtitle: {
-    color: COLORS.neutral.black,
+    color: COLORS.primary,
     fontFamily: 'Inter',
     fontWeight: 500,
-    fontSize: '14px',
-     margin: '0',
+    fontSize: '16px',
+    margin: '0',
   },
   nav: {
     display: 'flex',
@@ -234,28 +269,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     alignItems: 'center',
     padding: '20px 48px',
-  },
-  quoteContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '2px',
-  },
-  quoteText: {
-    fontSize: '14px',
-    fontWeight: 400,
-    color: COLORS.primary,
-    fontStyle: 'italic',
-    lineHeight: '1.5',
-    margin: 0,
-    textAlign: 'center',
-  },
-  quoteAuthor: {
-    fontStyle: 'normal',
-    fontWeight: 600,
-    color: COLORS.neutral.gray,
-    fontSize: '13px',
-    textAlign: 'center',
+    position: 'relative',
+    // backgroundColor: COLORS.backgroundVisible,
   },
   content: {
     flex: 1,
@@ -265,6 +280,28 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
   },
+  welcomeText: {
+    display: 'flex',
+    fontSize: '32px',
+    fontFamily: 'Inter, sans-serif',
+    fontWeight: 700,
+    color: COLORS.neutral.black,
+    justifySelf: 'flex-start',
+    // margin: 0,
+    // alignSelf: 'flex-start',
+  },
+  // separator: {
+  //   display: 'inline-block',
+  //   width: '4px',
+  //   height: '96px',
+  //   backgroundColor: COLORS.aqua,
+  //   borderRadius: '2px',
+  //   marginRight: '16px',
+  //   position: 'absolute',
+  //   left: '0px',
+  //   top: '50%',
+  //   transform: 'translateY(-50%)',
+  // }
 };
 
 export default AdminLayout;
