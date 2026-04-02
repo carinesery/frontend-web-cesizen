@@ -6,6 +6,7 @@ import { createArticleBodySchema } from '../schemas/articleSchema';
 import { categoryService } from '../services/categoryService';
 import { articleService } from '../services/articleService';
 import AdminLayout from '../components/AdminLayout';
+import { formStyles, getInputStyle, getTextareaStyle, getSelectStyle, getFileInputStyle } from '../styles/formStyles';
 
 const CreateArticle = () => {
   const navigate = useNavigate();
@@ -205,80 +206,96 @@ const CreateArticle = () => {
 
   return (
     <AdminLayout>
-      <div style={styles.container}>
+      <div style={{ ...formStyles.container, maxWidth: 'none' }}>
+        <div style={formStyles.formHeader}>
+          <h2 style={formStyles.formTitle}>Créer un nouvel article</h2>
+          <button
+            type="button"
+            onClick={() => navigate('/admin/articles')}
+            style={formStyles.backBtn}
+          >
+            ← Retour aux articles
+          </button>
+        </div>
+
         {successMessage && (
-          <div style={{
-            background: '#d4edda',
-            color: '#155724',
-            padding: '10px',
-            borderRadius: '4px',
-            marginBottom: '20px'
-          }}>
+          <div style={formStyles.successMessage}>
             {successMessage}
           </div>
         )}
         {errors.submit && (
-          <div style={styles.error}>
+          <div style={formStyles.errorMessage}>
             {errors.submit}
           </div>
         )}
-        <button
-          onClick={() => navigate('/admin/articles')}
-          style={styles.backBtn}
-        >
-          ← Retour
-        </button>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <h2>Créer un nouvel article</h2>
+        <form onSubmit={handleSubmit} style={formStyles.form}>
+          <div style={formStyles.formGrid}>
+            {error && <div style={{ ...formStyles.errorMessage, ...formStyles.fullWidth }}>{error}</div>}
 
-          {error && <div style={styles.error}>{error}</div>}
+            {/* ===== TITRE + STATUT ===== */}
+            <div style={formStyles.formGroup}>
+              <label style={formStyles.label}>Titre *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                style={getInputStyle(false)}
+                onBlur={handleBlur}
+                placeholder="Titre de l'article"
+              />
+            </div>
 
-          <div style={styles.formGroup}>
-            <label>Titre *</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              onBlur={handleBlur}
-              placeholder="Titre de l'article"
-            />
-          </div>
+            <div style={formStyles.formGroup}>
+              <label style={formStyles.label}>Statut</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                style={formStyles.select}
+                onBlur={handleBlur}
+              >
+                <option value="DRAFT">Brouillon</option>
+                <option value="PUBLISHED">Publié</option>
+                <option value="ARCHIVED">Archivé</option>
+              </select>
+            </div>
 
-          <div style={styles.formGroup}>
-            <label>Résumé</label>
-            <textarea
-              name="summary"
-              value={formData.summary}
-              onChange={handleChange}
-              style={{ ...styles.input, minHeight: '80px' }}
-              onBlur={handleBlur}
-              placeholder="Résumé court de l'article"
-            />
-          </div>
+            {/* ===== RÉSUMÉ (pleine largeur) ===== */}
+            <div style={{ ...formStyles.formGroup, ...formStyles.fullWidth }}>
+              <label style={formStyles.label}>Résumé</label>
+              <textarea
+                name="summary"
+                value={formData.summary}
+                onChange={handleChange}
+                style={getTextareaStyle(false, '80px')}
+                onBlur={handleBlur}
+                placeholder="Résumé court de l'article"
+              />
+            </div>
 
-          <div style={styles.formGroup}>
-            <label>Contenu *</label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              required
-              style={{ ...styles.input, minHeight: '300px' }}
-              onBlur={handleBlur}
-              placeholder="Contenu principal de l'article"
-            />
-          </div>
-          <div style={styles.row}>
-            <div style={styles.formGroup}>
-              <label>Catégories</label>
+            {/* ===== CONTENU (pleine largeur) ===== */}
+            <div style={{ ...formStyles.formGroup, ...formStyles.fullWidth }}>
+              <label style={formStyles.label}>Contenu *</label>
+              <textarea
+                name="content"
+                value={formData.content}
+                onChange={handleChange}
+                required
+                style={getTextareaStyle(false, '200px')}
+                onBlur={handleBlur}
+                placeholder="Contenu principal de l'article"
+              />
+            </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '5px' }}>
+            {/* ===== CATÉGORIES + IMAGE ===== */}
+            <div style={formStyles.formGroup}>
+              <label style={formStyles.label}>Catégories</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
                 {categories.map(cat => (
-                  <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label key={cat.slug} style={formStyles.checkboxRow}>
                     <input
                       type="checkbox"
                       checked={formData.categories.includes(cat.slug)}
@@ -301,160 +318,51 @@ const CreateArticle = () => {
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* <div style={styles.formGroup}>
-              <label>Catégories</label>
-              <select
-                name="categories"
-                value={formData.categories}
-                onChange={handleChange}
-                style={styles.input}
-                // onBlur={handleBlur}
-                multiple
-              >
-                <option disabled value="">-- Choisir une ou plusieurs catégories --</option>
-                {categories.map(category => (
-                  <option key={category.slug} value={category.slug}>
-                    {category.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p style={styles.formGroup}>
-              Sélectionné : {formData.categories.join(', ')}
-            </p>
-          </div> */}
-
-          <div style={styles.row}>
-            <div style={styles.formGroup}>
-              <label>Statut</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                style={styles.input}
-                onBlur={handleBlur}
-              >
-                <option value="DRAFT">Brouillon</option>
-                <option value="PUBLISHED">Publié</option>
-                <option value="ARCHIVED">Archivé</option>
-              </select>
-            </div>
-
-            {/* ===== IMAGE DE PRÉSENTATION ===== */}
-            <div style={{ marginBottom: '15px' }}>
-              <label htmlFor="presentationImageUrl">Image de présentation (optionnel)</label>
+            <div style={formStyles.formGroup}>
+              <label style={formStyles.label} htmlFor="presentationImageUrl">Image de présentation (optionnel)</label>
               <input
                 id="presentationImageUrl"
                 type="file"
                 name="presentationImageUrl"
                 onChange={handleFileChange}
                 accept="image/*"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: errors.presentationImageUrl ? '2px solid #dc3545' : '1px solid #ddd',
-                  boxSizing: 'border-box',
-                  marginTop: '5px'
-                }}
+                style={getFileInputStyle(!!errors.presentationImageUrl)}
               />
               {selectedFile && (
-                <small style={{ display: 'block', marginTop: '5px', color: '#28a745' }}>
+                <small style={formStyles.fileSuccess}>
                   ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
                 </small>
               )}
               {errors.presentationImageUrl && (
-                <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                <span style={formStyles.fieldError}>
                   {errors.presentationImageUrl}
                 </span>
               )}
             </div>
-          </div>
 
-          <div style={styles.actions}>
-            <button
-              type="button"
-              onClick={() => navigate('/admin/articles')}
-              style={{ ...styles.btn, background: '#95a5a6' }}
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ ...styles.btn, background: '#27ae60' }}
-            >
-              {loading ? 'Création...' : 'Créer l\'article'}
-            </button>
+            {/* ===== ACTIONS ===== */}
+            <div style={formStyles.actions}>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/articles')}
+                style={formStyles.cancelBtn}
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                style={loading ? formStyles.confirmBtnDisabled : formStyles.confirmBtn}
+              >
+                {loading ? 'Création...' : 'Créer l\'article'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </AdminLayout>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    maxWidth: '800px',
-  },
-  backBtn: {
-    backgroundColor: '#95a5a6',
-    color: 'white',
-    padding: '8px 16px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginBottom: '20px',
-    fontSize: '14px',
-  },
-  form: {
-    backgroundColor: 'white',
-    padding: '30px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-  },
-  formGroup: {
-    marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  input: {
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    marginTop: '5px',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-  },
-  row: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px',
-  },
-  error: {
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    padding: '12px',
-    borderRadius: '4px',
-    marginBottom: '20px',
-  },
-  actions: {
-    display: 'flex',
-    gap: '10px',
-    marginTop: '30px',
-    paddingTop: '20px',
-    borderTop: '1px solid #ddd',
-  },
-  btn: {
-    color: 'white',
-    padding: '10px 20px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    flex: 1,
-  },
 };
 
 export default CreateArticle;

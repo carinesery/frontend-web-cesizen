@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { COLORS, SPACING } from '../constants/themes';
 import { IoDocumentTextOutline, IoBookmarksOutline, IoHappyOutline, IoPeopleOutline, IoStatsChartOutline, IoLogOutOutline } from 'react-icons/io5';
-import logoCesizen from '../assets/images/logo-cesizen-fond-moyen.png';
+import logoCesizen from '../assets/images/logo-cesizen.png';
 import lotusViolet from '../assets/images/lotus-violet.png';
 import logoMinistere from '../assets/images/logo-ministere-sante.png';
 
@@ -23,29 +23,33 @@ const NavItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; label
 const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [quote, setQuote] = useState('');
-  const [quoteAuthor, setQuoteAuthor] = useState('');
 
-  useEffect(() => {
-    const fetchQuote = async () => {
-      try {
-        const res = await fetch('https://zenquotes.io/api/random');
-        const data = await res.json();
-        const q = Array.isArray(data) ? data[0] : data;
-        if (!q?.q) return;
+  // ZenQuotes désactivé temporairement (CORS)
+  // const [quote, setQuote] = useState('');
+  // const [quoteAuthor, setQuoteAuthor] = useState('');
+  // useEffect(() => {
+  //   const fetchQuote = async () => {
+  //     try {
+  //       const res = await fetch('/api/zenquotes/random');
+  //       const data = await res.json();
+  //       const q = Array.isArray(data) ? data[0] : data;
+  //       if (!q?.q) return;
+  //       const translation = await fetch(
+  //         `/api/mymemory/get?q=${encodeURIComponent(q.q)}&langpair=en|fr`
+  //       );
+  //       const transData = await translation.json();
+  //       setQuote(transData.responseData.translatedText);
+  //       setQuoteAuthor(q.a);
+  //     } catch (err) {
+  //       console.error('Erreur citation:', err);
+  //     }
+  //   };
+  //   fetchQuote();
+  // }, []);
 
-        const translation = await fetch(
-          `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q.q)}&langpair=en|fr`
-        );
-        const transData = await translation.json();
-        setQuote(transData.responseData.translatedText);
-        setQuoteAuthor(q.a);
-      } catch (err) {
-        console.error('Erreur citation:', err);
-      }
-    };
-    fetchQuote();
-  }, []);
+  // Citation déplacée dans le Dashboard
+  // const quote = ...
+  // const quoteAuthor = ...
 
   const handleLogout = () => {
     logout();
@@ -56,18 +60,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     <div style={styles.container}>
       {/* Header */}
       <header style={styles.header}>
-          <div>
-            <span>Bienvenue, {user?.username || 'Admin'}</span>
-            {quote && (
-              <div style={styles.quoteContainer}>
-                <img src={lotusViolet} alt="Lotus" style={styles.quoteLotus} />
-                <p style={styles.quoteText}>
-                  « {quote} »
-                  <span style={styles.quoteAuthor}> — {quoteAuthor}</span>
-                </p>
-              </div>
-            )}
-          </div>
         </header>
       {/* Sidebar */}
       <aside style={styles.sidebar}>
@@ -158,7 +150,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: COLORS.primary,
     fontFamily: 'Just Sans',
     fontWeight: 'bold',
-    fontSize: `${SPACING.xl}px`,
+    fontSize: '24px',
     margin: '0',
   },
   subtitle: {
@@ -224,7 +216,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 400,
   },
   footerLogo: {
-    width: '180px',
+    width: '90px',
     objectFit: 'contain',
   },
   main: {
@@ -238,44 +230,38 @@ const styles: Record<string, React.CSSProperties> = {
   header: {
     gridArea: 'header',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'center',
-    padding: '16px 48px',
-    fontSize: '24px',
-    fontFamily: 'Inter',
-    fontWeight: 600,
-    color: COLORS.accent,
+    alignItems: 'center',
+    padding: '20px 48px',
   },
   quoteContainer: {
     display: 'flex',
-    alignItems: 'flex-start',
-    gap: '12px',
-    marginTop: '10px',
-  },
-  quoteLotus: {
-    width: '24px',
-    flexShrink: 0,
-    marginTop: '2px',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2px',
   },
   quoteText: {
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: 400,
     color: COLORS.primary,
     fontStyle: 'italic',
     lineHeight: '1.5',
     margin: 0,
+    textAlign: 'center',
   },
   quoteAuthor: {
     fontStyle: 'normal',
     fontWeight: 600,
     color: COLORS.neutral.gray,
-    fontSize: '12px',
+    fontSize: '13px',
+    textAlign: 'center',
   },
   content: {
     flex: 1,
     backgroundColor: COLORS.neutral.white,
     padding: '20px',
-    overflow: 'hidden',
+    overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
   },

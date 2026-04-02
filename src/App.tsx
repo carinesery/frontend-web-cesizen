@@ -13,6 +13,7 @@ import Users from './pages/Users';
 import ViewUser from './pages/ViewUser';
 import CreateUser from './pages/CreateUser';
 import ConfirmEmailPage from './pages/ConfirmEmailPage';
+import NeedsLegalPage from './pages/NeedsLegalPage';
 import EditUser from './pages/EditUser';
 import CreateCategory from './pages/CreateCategory';
 import ViewCategory from './pages/ViewCategory';
@@ -32,7 +33,8 @@ function App() {
           {/* Public route */}
           <Route path="/login" element={<Login />} />
           <Route path="/403" element={<Page403 />} />
-          <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
+          <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
+          <Route path="/auth/needs-legal" element={<NeedsLegalPage />} />
 
           {/* Protected routes */}
           <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Dashboard /></ProtectedRoute>}/>

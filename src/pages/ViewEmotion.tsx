@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { emotionService } from '../services/emotionService';
 import AdminLayout from '../components/AdminLayout';
+import { COLORS } from '../constants/themes';
 import { LevelEmotionEnum } from '../schemas/emotionSchema';
+import { formStyles } from '../styles/formStyles';
 
 const ViewEmotion = () => {
     const { id } = useParams();
@@ -17,7 +19,7 @@ const ViewEmotion = () => {
     // ========== CHARGEMENT DES DONNÉES ==========
     useEffect(() => {
         fetchEmotion();
-    }, [id]); // Recharge si le slug change
+    }, [id]);
 
     const fetchEmotion = async () => {
         try {
@@ -33,8 +35,7 @@ const ViewEmotion = () => {
         }
     };
 
-    // ========== ACTIONS POUR AMELIORER L'UX ========== //
-
+    // ========== ACTIONS ==========
     const handleDeleteEmotion = async (id) => {
         if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette émotion ?')) return;
 
@@ -53,8 +54,8 @@ const ViewEmotion = () => {
     if (loading) {
         return (
             <AdminLayout>
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <p>Chargement...</p>
+                <div style={{ textAlign: 'center', padding: '40px', color: COLORS.textLight }}>
+                    Chargement...
                 </div>
             </AdminLayout>
         );
@@ -63,7 +64,7 @@ const ViewEmotion = () => {
     if (error || !emotion) {
         return (
             <AdminLayout>
-                <div style={{ color: 'red', padding: '20px', textAlign: 'center' }}>
+                <div style={formStyles.errorMessage}>
                     {error || 'Émotion non trouvée'}
                 </div>
             </AdminLayout>
@@ -77,134 +78,164 @@ const ViewEmotion = () => {
 
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-                <h2>Détails de l'émotion</h2>
+            <div style={formStyles.container}>
+                {/* ===== EN-TÊTE ===== */}
+                <div style={formStyles.formHeader}>
+                    <h2 style={formStyles.formTitle}>Détails de l'émotion</h2>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin/emotions')}
+                        style={formStyles.backBtn}
+                    >
+                        ← Retour aux émotions
+                    </button>
+                </div>
 
-                {/* Message d'erreur des actions */}
+                {/* ===== ERREUR ACTION ===== */}
                 {error && (
-                    <div style={{
-                        background: '#f8d7da',
-                        color: '#721c24',
-                        padding: '10px',
-                        borderRadius: '4px',
-                        marginBottom: '20px'
-                    }}>
-                        {error}
-                    </div>
+                    <div style={formStyles.errorMessage}>{error}</div>
                 )}
 
-                {/* ===== INFOS DE L'ÉMOTION ===== */}
-                <div style={{
-                    background: '#f8f9fa',
-                    padding: '20px',
-                    borderRadius: '4px',
-                    marginBottom: '20px'
-                }}>
-                    {/* Titre */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ fontWeight: 'bold', color: '#333' }}>Titre</label>
-                        <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px' }}>
-                            {emotion.title}
-                        </p>
-                    </div>
-                     {/* Niveau */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ fontWeight: 'bold', color: '#333' }}>Niveau</label>
-                        <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px' }}>
-                            {LevelLabels[emotion.level]}
-                        </p>
-                    </div>
+                {/* ===== CARD INFO ===== */}
+                <div style={formStyles.form}>
+                    <div style={formStyles.formGrid}>
 
-                      {/* Emotion parent */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ fontWeight: 'bold', color: '#333' }}>Emotion principale associée</label>
-                        <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px' }}>
-                            {emotion.parentEmotionId || '-'}
-                        </p>
-                    </div>
+                        {/* Titre */}
+                        <div style={formStyles.formGroup}>
+                            <label style={styles.sectionLabel}>Titre</label>
+                            <p style={styles.value}>{emotion.title}</p>
+                        </div>
 
-                    {/* Description */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ fontWeight: 'bold', color: '#333' }}>Description</label>
-                        <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px' }}>
-                            {emotion.description || '-'}
-                        </p>
-                    </div>
+                        {/* Niveau */}
+                        <div style={formStyles.formGroup}>
+                            <label style={styles.sectionLabel}>Niveau</label>
+                            <p style={styles.value}>{LevelLabels[emotion.level]}</p>
+                        </div>
 
-                    {/* Icon */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ fontWeight: 'bold', color: '#333' }}>Icon</label>
-                        <p style={{ margin: '5px 0 0 0', padding: '8px', background: 'white', borderRadius: '4px' }}>
-                            {emotion.iconUrl ? <img src={`http://localhost:3000${emotion.iconUrl}`} alt="Icon" style={{ maxWidth: '100px', maxHeight: '100px' }} /> : '-'}
-                        </p>
+                        {/* Émotion parente */}
+                        <div style={formStyles.formGroup}>
+                            <label style={styles.sectionLabel}>Émotion principale associée</label>
+                            <p style={styles.value}>
+                                {emotion.parentEmotion?.title || '-'}
+                            </p>
+                        </div>
+
+                        {/* Icône */}
+                        <div style={formStyles.formGroup}>
+                            <label style={styles.sectionLabel}>Icône</label>
+                            {emotion.iconUrl ? (
+                                <img
+                                    src={`http://localhost:3000${emotion.iconUrl}`}
+                                    alt="Icône"
+                                    style={{ maxWidth: '80px', maxHeight: '80px', borderRadius: '8px', marginTop: '4px' }}
+                                />
+                            ) : (
+                                <p style={styles.value}>-</p>
+                            )}
+                        </div>
+
+                        {/* Description (pleine largeur) */}
+                        <div style={{ ...formStyles.formGroup, ...formStyles.fullWidth }}>
+                            <label style={styles.sectionLabel}>Description</label>
+                            <p style={styles.value}>{emotion.description || '-'}</p>
+                        </div>
+
+                        {/* Sous-émotions (pleine largeur) */}
+                        {emotion.childEmotions && emotion.childEmotions.length > 0 && (
+                            <div style={{ ...formStyles.formGroup, ...formStyles.fullWidth }}>
+                                <label style={styles.sectionLabel}>Sous-émotions ({emotion.childEmotions.length})</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                                    {emotion.childEmotions.map((child) => (
+                                        <span
+                                            key={child.idEmotion}
+                                            onClick={() => navigate(`/admin/emotions/${child.idEmotion}`)}
+                                            style={styles.childBadge}
+                                        >
+                                            {child.title}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* ===== ACTIONS =====*/}
-                <div style={{
-                    display: 'flex',
-                    gap: '10px',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap'
-                }}>
-                    {/* Bouton Retour */}
-                    <button
-                        onClick={() => navigate('/admin/emotions')}
-                        style={{
-                            flex: 1,
-                            padding: '10px 20px',
-                            background: '#6c757d',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                        }}
-                    >
-                        ← Retour
-                    </button>
-
-                    {/* Bouton Modifier */}
+                {/* ===== ACTIONS ===== */}
+                <div style={{ display: 'flex', gap: '12px' }}>
                     <button
                         onClick={() => navigate(`/admin/emotions/${id}/edit`)}
-                        style={{
-                            flex: 1,
-                            padding: '10px 20px',
-                            background: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                        }}
+                        style={styles.editBtn}
                     >
                         ✏️ Modifier
                     </button>
 
-                    {/* Bouton Supprimer */}
-                     {emotion.childEmotions.length === 0 && (
-                    <button
-                        onClick={() => handleDeleteEmotion(id)}
-                        disabled={actionLoading}
-                        style={{
-                            flex: 1,
-                            padding: '10px 20px',
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: actionLoading ? 'not-allowed' : 'pointer',
-                            fontSize: '14px',
-                            opacity: actionLoading ? 0.7 : 1
-                        }}
-                    >
-                        🗑️ Supprimer
-                    </button>
-                     )}
+                    {emotion.childEmotions.length === 0 && (
+                        <button
+                            onClick={() => handleDeleteEmotion(id)}
+                            disabled={actionLoading}
+                            style={{
+                                ...styles.deleteBtn,
+                                cursor: actionLoading ? 'not-allowed' : 'pointer',
+                                opacity: actionLoading ? 0.7 : 1,
+                            }}
+                        >
+                            🗑️ Supprimer
+                        </button>
+                    )}
                 </div>
             </div>
         </AdminLayout>
     );
+};
+
+// ===== STYLES LOCAUX =====
+const styles: Record<string, React.CSSProperties> = {
+    sectionLabel: {
+        fontSize: '11px',
+        fontWeight: 600,
+        color: COLORS.neutral.gray,
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '4px',
+    },
+    value: {
+        margin: 0,
+        fontSize: '14px',
+        fontFamily: 'Inter, sans-serif',
+        color: COLORS.neutral.black,
+        padding: '10px 14px',
+        backgroundColor: '#F7F9FB',
+        borderRadius: '8px',
+        border: `1px solid ${COLORS.neutral.borderGray}`,
+    },
+    childBadge: {
+        padding: '6px 14px',
+        backgroundColor: COLORS.backgroundVisible,
+        color: COLORS.accent,
+        borderRadius: '20px',
+        fontSize: '13px',
+        fontWeight: 600,
+        cursor: 'pointer',
+    },
+    editBtn: {
+        padding: '12px 24px',
+        backgroundColor: COLORS.backgroundVisible,
+        color: COLORS.accent,
+        border: 'none',
+        borderRadius: '32px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: 600,
+    },
+    deleteBtn: {
+        padding: '12px 24px',
+        backgroundColor: COLORS.backgroundDelete,
+        color: COLORS.delete,
+        border: 'none',
+        borderRadius: '32px',
+        fontSize: '14px',
+        fontWeight: 600,
+    },
 };
 
 export default ViewEmotion;

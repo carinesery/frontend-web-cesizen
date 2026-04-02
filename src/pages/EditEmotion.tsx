@@ -5,7 +5,9 @@ import { z } from 'zod';
 import { updateEmotionBodySchema } from '../schemas/emotionSchema';
 import { emotionService } from '../services/emotionService';
 import AdminLayout from '../components/AdminLayout';
+import { IoPencilSharp } from 'react-icons/io5';
 import { LevelEmotionEnum } from '../schemas/emotionSchema';
+import { formStyles, getInputStyle, getTextareaStyle, getFileInputStyle } from '../styles/formStyles';
 
 const EditEmotion = () => {
     const navigate = useNavigate();
@@ -242,224 +244,154 @@ const EditEmotion = () => {
 
     return (
         <AdminLayout>
-            <div style={styles.container}>
+            <div style={formStyles.container}>
+                <div style={formStyles.formHeader}>
+                    <h2 style={formStyles.formTitle}>Modifier l'émotion</h2>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin/emotions')}
+                        style={formStyles.backBtn}
+                    >
+                        ← Retour aux émotions
+                    </button>
+                </div>
+
                 {successMessage && (
-                    <div style={{
-                        background: '#d4edda',
-                        color: '#155724',
-                        padding: '10px',
-                        borderRadius: '4px',
-                        marginBottom: '20px'
-                    }}>
+                    <div style={formStyles.successMessage}>
                         {successMessage}
                     </div>
                 )}
                 {errors.submit && (
-                    <div style={styles.error}>
+                    <div style={formStyles.errorMessage}>
                         {errors.submit}
                     </div>
                 )}
-                <button
-                    onClick={() => navigate('/admin/emotions')}
-                    style={styles.backBtn}
-                >
-                    ← Retour
-                </button>
 
-                <form onSubmit={handleSubmit} style={styles.form}>
-                    <h2>Modifier l'émotion</h2>
+                <form onSubmit={handleSubmit} style={formStyles.form}>
+                  <div style={formStyles.formGrid}>
+                    {error && <div style={{ ...formStyles.errorMessage, ...formStyles.fullWidth }}>{error}</div>}
 
-                    {error && <div style={styles.error}>{error}</div>}
-
-                    <div style={styles.formGroup}>
-                        <label>Titre *</label>
+                    {/* ===== TITRE + NIVEAU ===== */}
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label}>Titre *</label>
                         <input
                             type="text"
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
                             required
-                            style={styles.input}
+                            style={getInputStyle(false)}
                             onBlur={handleBlur}
                             placeholder="Titre de l'émotion"
                         />
                     </div>
 
-                    <div style={styles.formGroup}>
-                        <label>Description</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label}>Niveau *</label>
+                        <select
+                            name="level"
+                            value={formData.level}
+                            onChange={handleChange}
+                            style={formStyles.select}
+                            onBlur={handleBlur}
+                        >
+                            <option value={LevelEmotionEnum.LEVEL_1}>Emotion principale</option>
+                            <option value={LevelEmotionEnum.LEVEL_2}>Emotion secondaire (sentiment)</option>
+                        </select>
+                    </div>
+
+                    {/* ===== ÉMOTION PARENTE + ICÔNE ===== */}
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label}>Émotion parente</label>
+                        <select disabled={formData.level === LevelEmotionEnum.LEVEL_1}
+                            name="parentEmotionId"
+                            value={formData.parentEmotionId || ""}
+                            onChange={handleChange}
+                            style={formStyles.select}
+                            onBlur={handleBlur}
+                        >
+                            <option value="">-- Choisir une émotion parente --</option>
+                            {parentEmotions.map(emotion => (
+                                <option key={emotion.id} value={emotion.id}>
+                                    {emotion.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="iconUrl">Icône de l'émotion</label>
+                        <input
+                            id="iconUrl"
+                            type="file"
+                            name="iconUrl"
+                            onChange={handleFileChange}
+                            accept="image/*"
+                            style={getFileInputStyle(!!errors.iconUrl)}
+                        />
+                        {selectedFile && (
+                            <small style={formStyles.fileSuccess}>
+                                ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
+                            </small>
+                        )}
+                        {errors.iconUrl && (
+                            <span style={formStyles.fieldError}>
+                                {errors.iconUrl}
+                            </span>
+                        )}
+                        {formData.iconUrl && !selectedFile && (
+                            <div style={formStyles.imagePreview}>
+                                <img src={`http://localhost:3000${formData.iconUrl}`} width="100" style={{ borderRadius: '8px' }} />
+                                <button type="button"
+                                    style={formStyles.deleteImageBtn}
+                                    onClick={() => {
+                                        setRemovePicture(true);
+                                        setSelectedFile(null);
+                                        setFormData(prev => ({ ...prev, iconUrl: null }));
+                                    }}
+                                >
+                                    Supprimer la photo
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ===== DESCRIPTION (pleine largeur) ===== */}
+                    <div style={{ ...formStyles.formGroup, ...formStyles.fullWidth }}>
+                        <label style={formStyles.label}>Description</label>
                         <textarea
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            style={{ ...styles.input, minHeight: '80px' }}
+                            style={getTextareaStyle(false, '80px')}
                             onBlur={handleBlur}
                             placeholder="Décrivez l'émotion ici"
                         />
                     </div>
 
-                    <div style={styles.row}>
-                        <div style={styles.formGroup}>
-                            <label>Niveau *</label>
-                            <select
-                                name="level"
-                                value={formData.level}
-                                onChange={handleChange}
-                                style={styles.input}
-                                onBlur={handleBlur}
-                            >
-                                <option value={LevelEmotionEnum.LEVEL_1}>Emotion principale</option>
-                                <option value={LevelEmotionEnum.LEVEL_2}>Emotion secondaire (sentiment)</option>
-                            </select>
-                        </div>
-
-                       
-                        <div style={styles.formGroup}>
-                            <label>Émotion parente</label>
-                            <select disabled={formData.level === LevelEmotionEnum.LEVEL_1} // Désactiver si c'est une émotion de niveau 1
-                                name="parentEmotionId"
-                                value={formData.parentEmotionId || ""}
-                                onChange={handleChange}
-                                style={styles.input}
-                                onBlur={handleBlur}
-                            >
-                                <option value="">-- Choisir une émotion parente --</option>
-                                {parentEmotions.map(emotion => (
-                                    <option key={emotion.id} value={emotion.id}>
-                                        {emotion.title}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style={styles.row}>
-                        {/* ===== ICÔNE ===== */}
-                        <div style={{ marginBottom: '15px' }}>
-                            <label htmlFor="iconUrl">Icône de l'émotion</label>
-                            <input
-                                id="iconUrl"
-                                type="file"
-                                name="iconUrl"
-                                onChange={handleFileChange}
-                                accept="image/*"
-                                style={{
-                                    width: '100%',
-                                    padding: '8px',
-                                    borderRadius: '4px',
-                                    border: errors.iconUrl ? '2px solid #dc3545' : '1px solid #ddd',
-                                    boxSizing: 'border-box',
-                                    marginTop: '5px'
-                                }}
-                            />
-                            {selectedFile && (
-                                <small style={{ display: 'block', marginTop: '5px', color: '#28a745' }}>
-                                    ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
-                                </small>
-                            )}
-                            {errors.iconUrl && (
-                                <span style={{ color: '#dc3545', fontSize: '12px' }}>
-                                    {errors.iconUrl}
-                                </span>
-                            )}
-                            {formData.iconUrl && !selectedFile && (
-                                <div>
-                                    <img src={`http://localhost:3000${formData.iconUrl}`} width="100" />
-                                    <button type="button"
-                                        onClick={() => {
-                                            setRemovePicture(true);
-                                            setSelectedFile(null);
-                                            setFormData(prev => ({ ...prev, iconUrl: null }));
-                                        }}
-                                    >
-                                        Supprimer la photo
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div style={styles.actions}>
+                    {/* ===== ACTIONS ===== */}
+                    <div style={formStyles.actions}>
                         <button
                             type="button"
                             onClick={() => navigate('/admin/emotions')}
-                            style={{ ...styles.btn, background: '#95a5a6' }}
+                            style={formStyles.cancelBtn}
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
                             disabled={loading || !hasChanges}
-                            style={{ ...styles.btn, background: loading || !hasChanges() ? '#95a5a6' : '#27ae60' }}
+                            style={loading || !hasChanges() ? formStyles.editBtnDisabled : formStyles.editBtn}
                         >
+                            <IoPencilSharp size={16} color="#FFFFFF" />
                             {loading ? 'Modification' : 'Modifier l\'émotion'}
                         </button>
                     </div>
+                  </div>
                 </form>
             </div>
         </AdminLayout>
     );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-    container: {
-        maxWidth: '800px',
-    },
-    backBtn: {
-        backgroundColor: '#95a5a6',
-        color: 'white',
-        padding: '8px 16px',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        marginBottom: '20px',
-        fontSize: '14px',
-    },
-    form: {
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    },
-    formGroup: {
-        marginBottom: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    input: {
-        padding: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        marginTop: '5px',
-        fontSize: '14px',
-        fontFamily: 'inherit',
-    },
-    row: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '20px',
-    },
-    error: {
-        backgroundColor: '#f8d7da',
-        color: '#721c24',
-        padding: '12px',
-        borderRadius: '4px',
-        marginBottom: '20px',
-    },
-    actions: {
-        display: 'flex',
-        gap: '10px',
-        marginTop: '30px',
-        paddingTop: '20px',
-        borderTop: '1px solid #ddd',
-    },
-    btn: {
-        color: 'white',
-        padding: '10px 20px',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        flex: 1,
-    },
 };
 
 export default EditEmotion;

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createUserSchema } from '../schemas/userSchema';
 import { userService } from '../services/userService';
 import AdminLayout from '../components/AdminLayout';
+import { formStyles, getInputStyle, getSelectStyle, getFileInputStyle } from '../styles/formStyles';
 
 const CreateUser = () => {
     const navigate = useNavigate();
@@ -177,27 +178,37 @@ const CreateUser = () => {
     // ========== RENDER ==========
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-                <h2>Créer un utilisateur</h2>
+            <div style={formStyles.container}>
+                <div style={formStyles.formHeader}>
+                    <h2 style={formStyles.formTitle}>Créer un utilisateur</h2>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin/users')}
+                        style={formStyles.backBtn}
+                    >
+                        ← Retour aux utilisateurs
+                    </button>
+                </div>
 
                 {/* Message de succès */}
                 {successMessage && (
-                    <div style={{ background: '#d4edda', color: '#155724', padding: '10px', borderRadius: '4px', marginBottom: '20px' }}>
+                    <div style={formStyles.successMessage}>
                         {successMessage}
                     </div>
                 )}
 
                 {/* Message d'erreur serveur */}
                 {errors.submit && (
-                    <div style={{ background: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '4px', marginBottom: '20px' }}>
+                    <div style={formStyles.errorMessage}>
                         {errors.submit}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} style={formStyles.form}>
+                  <div style={formStyles.formGrid}>
                     {/* ===== USERNAME ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="username">Nom d'utilisateur *</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="username">Nom d'utilisateur *</label>
                         <input
                             id="username"
                             type="text"
@@ -206,25 +217,18 @@ const CreateUser = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             placeholder="Min 3 caractères"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.username ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getInputStyle(!!errors.username)}
                         />
                         {errors.username && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.username}
                             </span>
                         )}
                     </div>
 
                     {/* ===== EMAIL ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="email">Email *</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="email">Email *</label>
                         <input
                             id="email"
                             type="email"
@@ -233,25 +237,18 @@ const CreateUser = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             placeholder="user@example.com"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.email ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getInputStyle(!!errors.email)}
                         />
                         {errors.email && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.email}
                             </span>
                         )}
                     </div>
 
                     {/* ===== PASSWORD ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="password">Mot de passe *</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="password">Mot de passe *</label>
                         <input
                             id="password"
                             type="password"
@@ -260,28 +257,21 @@ const CreateUser = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             placeholder="Min 8 caractères"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.password ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getInputStyle(!!errors.password)}
                         />
                         {errors.password && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.password}
                             </span>
                         )}
-                        <small style={{ display: 'block', marginTop: '5px', color: '#666' }}>
+                        <small style={formStyles.helperText}>
                             Doit contenir: 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial
                         </small>
                     </div>
 
                     {/* ===== CONFIRM PASSWORD ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="confirmPassword">Confirmer le mot de passe *</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="confirmPassword">Confirmer le mot de passe *</label>
                         <input
                             id="confirmPassword"
                             type="password"
@@ -290,97 +280,70 @@ const CreateUser = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             placeholder="Réentrer le mot de passe"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.confirmPassword ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getInputStyle(!!errors.confirmPassword)}
                         />
                         {errors.confirmPassword && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.confirmPassword}
                             </span>
                         )}
                     </div>
 
                     {/* ===== ROLE ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="role">Rôle *</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="role">Rôle *</label>
                         <select
                             id="role"
                             name="role"
                             value={formData.role}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.role ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getSelectStyle(!!errors.role)}
                         >
                             <option value="USER">Utilisateur</option>
                             <option value="ADMIN">Admin</option>
                         </select>
                         {errors.role && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.role}
                             </span>
                         )}
                     </div>
 
                     {/* ===== PROFILE PICTURE ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="profilePicture">Photo de profil (optionnel)</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="profilePicture">Photo de profil (optionnel)</label>
                         <input
                             id="profilePicture"
                             type="file"
                             name="profilePicture"
                             onChange={handleFileChange}
                             accept="image/*"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.profilPicture ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getFileInputStyle(!!errors.profilPicture)}
                         />
                         {selectedFile && (
-                            <small style={{ display: 'block', marginTop: '5px', color: '#28a745' }}>
+                            <small style={formStyles.fileSuccess}>
                                 ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
                             </small>
                         )}
                         {errors.profilPicture && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.profilPicture}
                             </span>
                         )}
                     </div>
 
                     {/* ===== SUBMIT BUTTON ===== */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            background: loading ? '#ccc' : '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontSize: '16px'
-                        }}
-                    >
-                        {loading ? 'Création en cours...' : 'Créer l\'utilisateur'}
-                    </button>
+                    <div style={formStyles.fullWidth}>
+                      <button
+                          type="submit"
+                          disabled={loading}
+                          style={loading ? formStyles.submitBtnDisabled : formStyles.submitBtn}
+                      >
+                          {loading ? 'Création en cours...' : 'Créer l\'utilisateur'}
+                      </button>
+                    </div>
+                  </div>
                 </form>
             </div>
         </AdminLayout>

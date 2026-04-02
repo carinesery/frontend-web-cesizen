@@ -2,6 +2,9 @@ import React from 'react';
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { formStyles } from '../styles/formStyles';
+import { COLORS } from '../constants/themes';
+import { IoMailOutline, IoLockClosedOutline } from 'react-icons/io5';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -28,87 +31,79 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h1>Connexion Admin</h1>
+    <div style={formStyles.pageContainer}>
+      <div style={{ width: '100%', maxWidth: '460px', padding: '0 24px' }}>
+        <h1 style={{
+          textAlign: 'center',
+          fontFamily: 'Just Sans',
+          fontSize: '28px',
+          color: COLORS.primary,
+          marginBottom: '8px',
+        }}>
+          Connectez-vous
+        </h1>
+        <p style={{
+          textAlign: 'center',
+          fontFamily: 'Nunito Sans',
+          fontSize: '14px',
+          color: COLORS.textLight,
+          marginBottom: '32px',
+        }}>
+          Avec CESIZen, prenez soin de votre santé mentale
+        </p>
 
-        {error && <div style={styles.error}>{error}</div>}
+        <form onSubmit={handleSubmit} style={{ ...formStyles.form, padding: '28px' }}>
+          {error && <div style={formStyles.errorMessage}>{error}</div>}
 
-        <div style={styles.formGroup}>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={styles.input}
-          />
-        </div>
+          <div style={formStyles.formGroup}>
+            <label style={formStyles.label}>Email</label>
+            <div style={{ position: 'relative' }}>
+              <IoMailOutline
+                size={18}
+                color={COLORS.textLight}
+                style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="votre@email.com"
+                style={{ ...formStyles.input, paddingLeft: '40px' }}
+              />
+            </div>
+          </div>
 
-        <div style={styles.formGroup}>
-          <label>Mot de passe</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={styles.input}
-          />
-        </div>
+          <div style={formStyles.formGroup}>
+            <label style={formStyles.label}>Mot de passe</label>
+            <div style={{ position: 'relative' }}>
+              <IoLockClosedOutline
+                size={18}
+                color={COLORS.textLight}
+                style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                style={{ ...formStyles.input, paddingLeft: '40px' }}
+              />
+            </div>
+          </div>
 
-        <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? 'Connexion...' : 'Se connecter'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            style={loading ? formStyles.submitBtnDisabled : formStyles.submitBtn}
+          >
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </form>
+      </div>
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#f5f5f5',
-  },
-  form: {
-    backgroundColor: 'white',
-    padding: '40px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-    width: '100%',
-    maxWidth: '400px',
-  },
-  formGroup: {
-    marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  input: {
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    marginTop: '5px',
-    fontSize: '14px',
-  },
-  button: {
-    backgroundColor: '#3498db',
-    color: 'white',
-    padding: '10px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    marginTop: '10px',
-  },
-  error: {
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    padding: '10px',
-    borderRadius: '4px',
-    marginBottom: '20px',
-  },
 };
 
 export default Login;

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { categoryService } from '../services/categoryService';
 import AdminLayout from '../components/AdminLayout';
 import { createCategoryBodySchema } from '../schemas/categorySchema';
+import { formStyles, getInputStyle, getTextareaStyle, getFileInputStyle } from '../styles/formStyles';
 
 const CreateCategory = () => {
     const navigate = useNavigate();
@@ -161,27 +162,37 @@ const CreateCategory = () => {
     // ========== RENDER ==========
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-                <h2>Créer une catégorie</h2>
+            <div style={formStyles.container}>
+                <div style={formStyles.formHeader}>
+                    <h2 style={formStyles.formTitle}>Créer une catégorie</h2>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin/categories')}
+                        style={formStyles.backBtn}
+                    >
+                        ← Retour aux catégories
+                    </button>
+                </div>
 
                 {/* Message de succès */}
                 {successMessage && (
-                    <div style={{ background: '#d4edda', color: '#155724', padding: '10px', borderRadius: '4px', marginBottom: '20px' }}>
+                    <div style={formStyles.successMessage}>
                         {successMessage}
                     </div>
                 )}
 
                 {/* Message d'erreur serveur */}
                 {errors.submit && (
-                    <div style={{ background: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '4px', marginBottom: '20px' }}>
+                    <div style={formStyles.errorMessage}>
                         {errors.submit}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit}>
-                    {/* ===== TITLE ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="title">Titre *</label>
+                <form onSubmit={handleSubmit} style={formStyles.form}>
+                  <div style={formStyles.formGrid}>
+                    {/* ===== TITLE + ICON ===== */}
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="title">Titre *</label>
                         <input
                             id="title"
                             type="text"
@@ -190,98 +201,67 @@ const CreateCategory = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             placeholder="Min 1 caractère"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.title ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getInputStyle(!!errors.title)}
                         />
                         {errors.title && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.title}
                             </span>
                         )}
                     </div>
 
-                    {/* ===== DESCRIPTION ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="description">Description</label>
-                        <input
-                            id="description"
-                            type="textarea"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            placeholder="Décrivez ici la catégorie"
-                            style={{
-                                width: '100%',
-                                height: '100px',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.description ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
-                        />
-                        {errors.description && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
-                                {errors.description}
-                            </span>
-                        )}
-                    </div>
-
-
-                    {/* ===== ICON CATEGORIE ===== */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="icon">Icône de la catégorie (optionnel)</label>
+                    <div style={formStyles.formGroup}>
+                        <label style={formStyles.label} htmlFor="icon">Icône de la catégorie (optionnel)</label>
                         <input
                             id="icon"
                             type="file"
                             name="iconUrl"
                             onChange={handleFileChange}
                             accept="image/*"
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '4px',
-                                border: errors.iconUrl ? '2px solid #dc3545' : '1px solid #ddd',
-                                boxSizing: 'border-box',
-                                marginTop: '5px'
-                            }}
+                            style={getFileInputStyle(!!errors.iconUrl)}
                         />
                         {selectedFile && (
-                            <small style={{ display: 'block', marginTop: '5px', color: '#28a745' }}>
+                            <small style={formStyles.fileSuccess}>
                                 ✅ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)}KB)
                             </small>
                         )}
                         {errors.iconUrl && (
-                            <span style={{ color: '#dc3545', fontSize: '12px' }}>
+                            <span style={formStyles.fieldError}>
                                 {errors.iconUrl}
                             </span>
                         )}
                     </div>
 
+                    {/* ===== DESCRIPTION (pleine largeur) ===== */}
+                    <div style={{ ...formStyles.formGroup, ...formStyles.fullWidth }}>
+                        <label style={formStyles.label} htmlFor="description">Description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder="Décrivez ici la catégorie"
+                            style={getTextareaStyle(!!errors.description, '100px')}
+                        />
+                        {errors.description && (
+                            <span style={formStyles.fieldError}>
+                                {errors.description}
+                            </span>
+                        )}
+                    </div>
+
                     {/* ===== SUBMIT BUTTON ===== */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            background: loading ? '#ccc' : '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontSize: '16px'
-                        }}
-                    >
-                        {loading ? 'Création en cours...' : 'Créer la catégorie'}
-                    </button>
+                    <div style={formStyles.fullWidth}>
+                      <button
+                          type="submit"
+                          disabled={loading}
+                          style={loading ? formStyles.submitBtnDisabled : formStyles.submitBtn}
+                      >
+                          {loading ? 'Création en cours...' : 'Créer la catégorie'}
+                      </button>
+                    </div>
+                  </div>
                 </form>
             </div>
         </AdminLayout>
