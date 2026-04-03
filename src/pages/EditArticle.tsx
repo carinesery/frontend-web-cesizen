@@ -6,7 +6,8 @@ import { updateArticleBodySchema } from '../schemas/articleSchema';
 import { categoryService } from '../services/categoryService';
 import { articleService } from '../services/articleService';
 import AdminLayout from '../components/AdminLayout';
-import { IoPencilSharp } from 'react-icons/io5';
+import { IoPencilSharp, IoTrashBinOutline } from 'react-icons/io5';
+import { ButtonAction } from '../components/ButtonAction';
 import { formStyles, getInputStyle, getTextareaStyle, getFileInputStyle } from '../styles/formStyles';
 
 const EditArticle = () => {

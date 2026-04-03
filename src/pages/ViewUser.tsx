@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { userService } from '../services/userService';
 import AdminLayout from '../components/AdminLayout';
+import { COLORS } from '../constants/themes';
 
 const ViewUser = () => {
     const { id } = useParams(); // Récupère l'ID de l'URL
@@ -194,11 +195,11 @@ const ViewUser = () => {
                         onClick={() => navigate('/admin/users')}
                         style={{
                             flex: 1,
-                            padding: '10px 20px',
+                            padding: '8px 16px',
                             background: '#6c757d',
                             color: 'white',
                             border: 'none',
-                            borderRadius: '4px',
+                            borderRadius: '32px',
                             cursor: 'pointer',
                             fontSize: '14px'
                         }}
@@ -211,17 +212,18 @@ const ViewUser = () => {
                         <button
                             onClick={() => navigate(`/admin/users/${id}/edit`)}
                             style={{
-                                flex: 1,
-                                padding: '10px 20px',
-                                background: '#007bff',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                padding: '16px 32px',
+                                background: COLORS.accent,
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
+                                borderRadius: '32px',
                                 cursor: 'pointer',
                                 fontSize: '14px'
                             }}
                         >
-                            ✏️ Modifier
+                            Modifier
                         </button>
                     )}
 
@@ -232,18 +234,20 @@ const ViewUser = () => {
                             disabled={actionLoading}
                             style={{
                                 flex: 1,
-                                padding: '10px 20px',
-                                background: user.isActive ? '#dc3545' : '#28a745',
+                                 display: 'flex',
+                                flexDirection: 'row',
+                                padding: '16px 32px',
+                                background: user.isActive ? COLORS.error : COLORS.success,
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
+                                borderRadius: '32px',
                                 cursor: actionLoading ? 'not-allowed' : 'pointer',
                                 fontSize: '14px',
                                 opacity: actionLoading ? 0.7 : 1
                             }}
                         >
 
-                            {user.isActive ? '🔴 Désactiver' : '🟢 Activer'}
+                            {user.isActive ? 'Désactiver' : 'Activer'}
                         </button>
                     )}
 
@@ -254,17 +258,19 @@ const ViewUser = () => {
                             disabled={actionLoading}
                             style={{
                                 flex: 1,
-                                padding: '10px 20px',
-                                background: '#dc3545',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                padding: '16px 32px',
+                                background: COLORS.error,
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
+                                borderRadius: '32px',
                                 cursor: actionLoading ? 'not-allowed' : 'pointer',
                                 fontSize: '14px',
                                 opacity: actionLoading ? 0.7 : 1
                             }}
                         >
-                            🗑️ Supprimer
+                        Supprimer
                         </button>
                     )}
                 </div>

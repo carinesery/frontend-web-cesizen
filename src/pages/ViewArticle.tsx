@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { articleService } from '../services/articleService';
 import AdminLayout from '../components/AdminLayout';
+import { COLORS } from '../constants/themes';
 
 const ViewArticle = () => {
   const { slug } = useParams();
@@ -101,13 +102,13 @@ const ViewArticle = () => {
           {/* )} */}
 
           <div style={styles.actions}>
-            <button
+            <button 
               onClick={() => navigate(`/admin/articles/${slug}/edit`)}
-              style={{ ...styles.btn, background: '#3498db' }}
+              style={{ ...styles.btn, background: COLORS.accent }}
             >
               ✏️ Éditer
             </button>
-            <button style={{ ...styles.btn, background: '#e74c3c' }}
+            <button style={{ ...styles.btn, background: COLORS.error }}
             onClick={() => handleDeleteArticle()}>
               🗑️ Supprimer
             </button>
@@ -190,9 +191,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   btn: {
     color: 'white',
-    padding: '10px 20px',
+    padding: '16px 32px',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '32px',
     cursor: 'pointer',
   },
 };

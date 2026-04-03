@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { categoryService } from '../services/categoryService';
 import AdminLayout from '../components/AdminLayout';
+import { COLORS } from '../constants/themes';
 
 const ViewCategory = () => {
     const { slug } = useParams();
@@ -13,6 +14,7 @@ const ViewCategory = () => {
     const [error, setError] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
 
+    
     // ========== CHARGEMENT DES DONNÉES ==========
     useEffect(() => {
         fetchCategory();
@@ -131,11 +133,11 @@ const ViewCategory = () => {
                         onClick={() => navigate('/admin/categories')}
                         style={{
                             flex: 1,
-                            padding: '10px 20px',
+                            padding: '8px 16px',
                             background: '#6c757d',
                             color: 'white',
                             border: 'none',
-                            borderRadius: '4px',
+                            borderRadius: '32px',
                             cursor: 'pointer',
                             fontSize: '14px'
                         }}
@@ -148,11 +150,11 @@ const ViewCategory = () => {
                         onClick={() => navigate(`/admin/categories/${slug}/edit`)}
                         style={{
                             flex: 1,
-                            padding: '10px 20px',
-                            background: '#007bff',
+                            padding: '16px 32px',
+                            background: COLORS.accent,
                             color: 'white',
                             border: 'none',
-                            borderRadius: '4px',
+                            borderRadius: '32px',
                             cursor: 'pointer',
                             fontSize: '14px'
                         }}
@@ -166,11 +168,11 @@ const ViewCategory = () => {
                         disabled={actionLoading}
                         style={{
                             flex: 1,
-                            padding: '10px 20px',
-                            background: '#dc3545',
+                            padding: '16px 32px',
+                            background: COLORS.error,
                             color: 'white',
                             border: 'none',
-                            borderRadius: '4px',
+                            borderRadius: '32px',
                             cursor: actionLoading ? 'not-allowed' : 'pointer',
                             fontSize: '14px',
                             opacity: actionLoading ? 0.7 : 1
