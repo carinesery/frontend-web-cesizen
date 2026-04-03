@@ -33,8 +33,8 @@ function App() {
           {/* Public route */}
           <Route path="/login" element={<Login />} />
           <Route path="/403" element={<Page403 />} />
-          <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
-          <Route path="/auth/needs-legal" element={<NeedsLegalPage />} />
+          <Route path="/admin/users/confirm-email" element={<ConfirmEmailPage />} />
+          <Route path="/admin/users/needs-legal" element={<NeedsLegalPage />} />
 
           {/* Protected routes */}
           <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Dashboard /></ProtectedRoute>}/>

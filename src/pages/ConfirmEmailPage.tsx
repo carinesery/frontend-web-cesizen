@@ -22,7 +22,7 @@ export default function ConfirmEmailPage() {
                 setSuccess(true);
 
                 if (response.needsTermsConsent && response.legalToken) {
-                    navigate(`/auth/needs-legal?token=${encodeURIComponent(response.legalToken)}`, { replace: true });
+                    navigate(`/admin/users/needs-legal?token=${encodeURIComponent(response.legalToken)}`, { replace: true });
                     return;
                 }
             } catch (err) {
